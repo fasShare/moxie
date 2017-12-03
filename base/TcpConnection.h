@@ -55,7 +55,7 @@ private:
     boost::shared_ptr<Events> event_;
     boost::shared_ptr<Buffer> readBuffer_;
     boost::shared_ptr<Buffer> writeBuffer_;
-    Socket connfd_;
+    int connfd_;
     NetAddress peerAddr_;
     bool shouldClose_;
     Timestamp acceptTime_;

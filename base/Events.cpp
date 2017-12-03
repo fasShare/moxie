@@ -164,6 +164,7 @@ struct pollfd fas::Events::pollEvents() {
 }
 
 fas::Events::~Events() {
+    ::close(fd_);
     LOGGER_TRACE("Events destroyed.");
 }
 

@@ -3,10 +3,8 @@
 #include <unistd.h>
 #include <new>
 
-
 #include <Socket.h>
 #include <Timestamp.h>
-#include <Handle.h>
 #include <Log.h>
 #include <EventLoop.h>
 #include <TcpServer.h>
@@ -86,7 +84,7 @@ void fas::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time)
         pool->addTcpConn(looptid, sd, sconn);
         workloop->updateEvents(conn_event);
         if (newConnCb_) {
-            newConnCb_(conn_event, acceptTime);
+            newConnCb_(sconn, acceptTime);
         }
     } else {
         LOGGER_ERROR("event.getFd() == server_.getSocket()");
@@ -123,5 +121,6 @@ void fas::TcpServer::setNewConnCallback(TcpConnCallback ncb) {
 }
 
 fas::TcpServer::~TcpServer() {
+    loop_->quit();
     LOGGER_TRACE("TcpServer will be destroyed in process " << getpid());
 }

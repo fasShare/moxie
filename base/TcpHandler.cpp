@@ -35,7 +35,6 @@ void fas::TcpHandle::handleRead(boost::shared_ptr<Events> revents, fas::Timestam
         //transfer data to back.
         read_cb_(conn, time);
     } 
-    std::cout << readBuffer->retrieveAllAsString() << std::endl;
 }
 
 void fas::TcpHandle::handleWrite(boost::shared_ptr<Events> revents, fas::Timestamp time) {

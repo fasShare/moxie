@@ -38,7 +38,7 @@ bool fas::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddress
 }
 
 int fas::TcpConnection::getConnfd() const {
-    return connfd_.getSocket();
+    return connfd_;
 }
 
 void fas::TcpConnection::setPeerAddr(const fas::NetAddress& addr) {

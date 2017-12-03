@@ -148,7 +148,7 @@ void fas::EventLoop::quit() {
     MutexLocker lock(mutex_);
     quit_ = true;
     if(!(tid_ == gettid())) {
-        //wakeUp();
+        wakeupLoop();
     }
     boost::ignore_unused(lock);
 }
