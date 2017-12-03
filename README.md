@@ -13,5 +13,5 @@
 * 接口简洁，代码可读性强<br>
 
 ***
-![Moxie logo] (https://github.com/fasShare/moxie/blob/master/logo/moxie.png)
+![Moxie logo](https://github.com/fasShare/moxie/blob/master/logo/moxie.png)
 ***
