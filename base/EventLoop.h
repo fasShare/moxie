@@ -12,7 +12,6 @@
 #include <Timestamp.h>
 #include <Condition.h>
 #include <Poller.h>
-#include <TcpHandler.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -26,7 +25,6 @@ class MutexLocker;
 
 class EventLoop : boost::noncopyable {
 public:
-    using Functor = boost::function<void ()>;
     EventLoop(PollerFactory *pollerFactory);
     EventLoop();
     ~EventLoop();
@@ -49,7 +47,6 @@ public:
     bool eventHandleAble(boost::shared_ptr<Events> origin);
 private:
     bool pollUpdate(boost::shared_ptr<Events> event);
-    void runFunctors();
 
     static const int kInitMaxEvents_ = 10;
     static std::atomic<int> count_;
@@ -58,16 +55,11 @@ private:
     int pollDelayTime_;
     PollerFactory *pollerFactory_;
 
-    std::vector<PollerEvent_t> revents_;
     std::map<int, boost::shared_ptr<Events>> events_;
     std::vector<boost::shared_ptr<Events>> mutable_;
     
     Mutex mutex_;
-    Condition cond_;
     long tid_;
-
-    std::vector<Functor> functors_;
-    bool runningFunctors_;
 
     bool quit_;
 

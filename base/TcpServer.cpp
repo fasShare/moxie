@@ -26,10 +26,10 @@ fas::TcpServer::TcpServer(const NetAddress& addr, int threadNum) :
     server_.setExecClose();
     server_.bind(addr_);
     server_.listen(listenBacklog_);
-    events_->setType(Events::type::TCP_SERVER);
+    events_->setType(Events::type::TCPSERVER);
 	LOGGER_TRACE("server listen fd = " << server_.getSocket());
     loop_->updateEvents(events_);
-    EventLoopPool::Instance()->addEventLoop(gettid(), loop_, true);
+    EventLoopPool::AddEventLoop(gettid(), loop_, true);
 }
 
 fas::EventLoop* fas::TcpServer::getLoop() const{
@@ -67,21 +67,21 @@ void fas::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time)
             LOGGER_SYSERR("In Tcpserver accepted return an error!");
             return;
         }
-        workloop = EventLoopPool::Instance()->getNextLoop();
+        workloop = EventLoopPool::GetNextLoop();
         if (nullptr == workloop) {
             workloop = loop_;
         }
+        long looptid = workloop->getTid();
 
         boost::shared_ptr<Events> conn_event(new fas::Events(sd, kReadEvent));
-        conn_event->setType(Events::type::TCP);
+        conn_event->setType(Events::type::TCPCONN);
+        conn_event->setTid(looptid);
         
         fas::TcpConnection::TcpConnShreadPtr sconn(new fas::TcpConnection());
         sconn->init(conn_event, peerAddr, acceptTime);
         
-        fas::TcpConnPool *pool = TcpConnPool::Instance();
-        long looptid = workloop->getTid();
         sconn->setTid(looptid);
-        pool->addTcpConn(looptid, sd, sconn);
+        TcpConnPool::AddTcpConn(sconn);
         workloop->updateEvents(conn_event);
         if (newConnCb_) {
             newConnCb_(sconn, acceptTime);
@@ -109,7 +109,7 @@ void fas::TcpServer::LoopThreadFunc() {
         return;
     }
 
-    if (!EventLoopPool::Instance()->addEventLoop(gettid(), loop)) {
+    if (!EventLoopPool::AddEventLoop(gettid(), loop)) {
         return;
     }
 

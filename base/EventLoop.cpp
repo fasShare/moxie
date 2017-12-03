@@ -7,16 +7,14 @@
 
 #include <Log.h>
 #include <Poller.h>
-#include <Poll.h>
-#include <Epoll.h>
-#include <Socket.h>
 #include <EventLoop.h>
 #include <Timestamp.h>
-#include <Thread.h>
 #include <Events.h>
-#include <HandlePool.h>
+#include <Thread.h>
+#include <TcpHandle.h>
 #include <EventfdHandle.h>
 #include <MutexLocker.h>
+#include <Eventsops.h>
 
 #include <boost/bind.hpp>
 #include <boost/core/ignore_unused.hpp>
@@ -31,24 +29,19 @@ fas::EventLoop::EventLoop(PollerFactory *pollerFactory) :
     poll_(nullptr),
     pollDelayTime_(200),
     pollerFactory_(pollerFactory),
-    revents_(),
+    events_(),
+    mutable_(),
     mutex_(),
-    cond_(mutex_),
     tid_(gettid()),
-    functors_(),
-    runningFunctors_(false),
     quit_(false),
     wakeFd_(CreateEventfd()) {
-    LOGGER_TRACE("Before EventLoop.");
     poll_ = pollerFactory_->getPoller();
     if (!poll_) {
         LOGGER_SYSERR("New Poller error!");
     }
     count_++;
-    HandlePool::Instance()->addHandler(Events::type::EVENT_FD, new EventfdHandle());
-    boost::shared_ptr<Events> wakeEvent(new Events(wakeFd_, kReadEvent));
-    wakeEvent->setType(Events::type::EVENT_FD);
-    updateEvents(wakeEvent);
+    Eventsops::RegisterEventHandler(Events::type::EVENTFD, new EventfdHandle());
+    Eventsops::BuildEventIntoLoop(this, new Events(wakeFd_, kReadEvent), Events::type::EVENTFD);
 }
 
 int fas::CreateEventfd() {
@@ -102,10 +95,6 @@ bool fas::EventLoop::pollUpdate(boost::shared_ptr<fas::Events> event) {
     if (event->isnew()) {
         auto iter = events_.find(event->getFd()); 
         assert(iter == events_.end());
-        //if (iter != events_.end()) {
-        //    assert(iter->second->isdel());
-        //    poll_->EventsDel(iter->second.get());
-        //}
         events_[event->getFd()] = event;
         LOGGER_TRACE("pollUpdate new");
         return poll_->EventsAdd(event.get());
@@ -127,21 +116,6 @@ void fas::EventLoop::resetOwnerTid() {
 
 void fas::EventLoop::assertInOwnerThread() {
     assert(gettid() == tid_);
-}
-
-void fas::EventLoop::runFunctors() {
-    std::vector<Functor> functors;
-    runningFunctors_ = true;
-
-    {
-        MutexLocker lock(mutex_);
-        functors.swap(functors_);
-    }
-
-    for (size_t i = 0; i < functors.size(); ++i) {
-        functors[i]();
-    }
-    runningFunctors_ = false;
 }
 
 void fas::EventLoop::quit() {
@@ -173,9 +147,10 @@ bool fas::EventLoop::loop() {
     LOGGER_TRACE("A EventLoop started.");
     assertInOwnerThread();
     Timestamp looptime;
+    std::vector<PollerEvent_t> occur;
     while (!quit_) {
         LOGGER_TRACE("start new loopping.");
-        revents_.clear();
+        occur.clear();
         decltype(mutable_) mutable_swap;
         {
             MutexLocker lock(mutex_);
@@ -186,8 +161,8 @@ bool fas::EventLoop::loop() {
             pollUpdate(*iter);
         }
 
-        looptime = poll_->Loop(revents_, 10000000);
-        for(auto iter = revents_.begin(); iter != revents_.end(); iter++) {
+        looptime = poll_->Loop(occur, 10000000);
+        for(auto iter = occur.begin(); iter != occur.end(); iter++) {
             auto events = events_.find(iter->fd);
             if (events == events_.end()) {
                 continue;
@@ -196,20 +171,16 @@ bool fas::EventLoop::loop() {
             if (!eventHandleAble(events->second)) {
                 continue;
             }
-            Handler * handler = HandlePool::Instance()->getHandler(events->second->getType());
-            if (handler == nullptr) {
-                LOGGER_TRACE("Handle not find");
-                continue;
-            }
+            Handler * handler = Eventsops::EventHandler(events->second->getType());
+            assert(handler);
             handler->doHandle(events->second, looptime);
         }
-        assert(!runningFunctors_);
-        runFunctors();
     } 
     return true;
 }
 
-fas::EventLoop::~EventLoop() { 
-    LOGGER_TRACE("EventLoop will be destroyed in process " << getpid());
+fas::EventLoop::~EventLoop() {
+    delete pollerFactory_;
+    LOGGER_TRACE("EventLoop will be destroyed in Thread:" << gettid());
 }
 

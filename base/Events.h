@@ -30,11 +30,11 @@ public:
         INVAILD,
     };
     enum type {
-        TCP,
-        TCP_SERVER,
+        TCPCONN,
+        TCPSERVER,
         TIMER,
         SIGNAL,
-        EVENT_FD,
+        EVENTFD,
         TYPEINVAILD,
     };
 

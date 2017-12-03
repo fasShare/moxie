@@ -9,12 +9,18 @@ namespace fas {
 
 class HandlePool {
 public:
-    static HandlePool* Instance();
+    static bool AddHandler(Events::type type, Handler *handler) {
+        return Instance()->addHandler(type, handler);
+    }
 
-    Handler *getHandler(Events::type type);
-
-    bool addHandler(Events::type type, Handler *handler);
+    static Handler *GetHandler(Events::type type) {
+        return Instance()->getHandler(type);
+    }
 private:
+    bool addHandler(Events::type type, Handler *handler);
+    Handler *getHandler(Events::type type);
+    static HandlePool* Instance();
+    
     static HandlePool *pool_;
     std::map<Events::type, Handler*> handlers_;
 };

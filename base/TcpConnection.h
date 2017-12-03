@@ -37,7 +37,7 @@ using CloseCallback = boost::function<void ()>;
 
     bool shouldClose();
     void setShouldClose(bool down);
-    bool shutdown();
+    static bool shutdown(TcpConnShreadPtr conn);
 
     void setDataEmpty(bool empty);
     bool dataEmpty();

@@ -14,12 +14,22 @@ class EventLoop;
 
 class EventLoopPool {
 public:
+    static bool AddEventLoop(long tid, EventLoop* loop, bool ismain = false) {
+        return Instance()->addEventLoop(tid, loop, ismain);
+    }
+    static EventLoop *GetNextLoop() {
+        return Instance()->getNextLoop();
+    }
+    static EventLoop *GetLoop(long tid) {
+        return Instance()->getLoop(tid);
+    }
+private:
     bool addEventLoop(long tid, EventLoop* loop, bool ismain = false);
     EventLoop *getNextLoop();
     EventLoop *getLoop(long tid);
     static EventLoopPool *Instance();
-private:
     EventLoopPool();
+    
     Mutex mutex_;
     std::map<long, EventLoop *> loops_;
     std::vector<EventLoop *> nextLoops_;

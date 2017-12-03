@@ -3,6 +3,7 @@
 #include <EventLoopPool.h>
 #include <EventLoop.h>
 #include <Timestamp.h>
+#include <Eventsops.h>
 #include <Socket.h>
 #include <Thread.h>
 #include <Log.h>
@@ -67,21 +68,20 @@ void fas::TcpConnection::setShouldClose(bool down) {
     shouldClose_ = down;
 }
 
-bool fas::TcpConnection::shutdown() {
-    if (!dataEmpty()) {
-        setShouldClose(true);
+bool fas::TcpConnection::shutdown(boost::shared_ptr<TcpConnection> conn) {
+    if (!conn->dataEmpty()) {
+        conn->setShouldClose(true);
         return true;
     }
-    auto loop = EventLoopPool::Instance()->getLoop(getTid());
-    event_->setState(Events::state::DEL);
-    loop->updateEvents(event_);
-    TcpConnPool::Instance()->removeTcpConn(getTid(), event_->getFd());
+    Eventsops::RemoveEventFromLoop(conn->event_);
+    TcpConnPool::RemoveTcpConn(conn);
     return true;
 }
 
 void fas::TcpConnection::setDataEmpty(bool empty) {
     dataEmpty_ = empty;
 }
+
 bool fas::TcpConnection::dataEmpty() {
     return dataEmpty_;
 }
@@ -107,7 +107,7 @@ bool fas::TcpConnection::disableRead() {
 }
 
 bool fas::TcpConnection::updateEvent() {
-    auto loop = EventLoopPool::Instance()->getLoop(getTid());
+    auto loop = EventLoopPool::GetLoop(getTid());
     if (!loop) {
         assert(false);
     }
