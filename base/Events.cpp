@@ -64,6 +64,14 @@ int fas::Events::getFd() const{
     return fd_;
 }
 
+long fas::Events::getTid() const {
+    return tid_;
+}
+
+void fas::Events::setTid(long tid) {
+    tid_ = tid;
+}
+
 fas::Events::state fas::Events::getState() const {
     return state_;
 }

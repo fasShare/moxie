@@ -20,7 +20,7 @@ void work() {
         }
         buf[bytes] = 0;
         write(client.getSocket(), buf, bytes);
-        sleep(rand()%3);
+        usleep(100);
         write(client.getSocket(), buf, bytes);
     }
 }

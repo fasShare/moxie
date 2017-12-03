@@ -13,17 +13,11 @@ public:
     void doHandle(boost::shared_ptr<Events> events, Timestamp time) {
         if (events->isClose()) {
             handleClose(events, time);
-        }   
-
-        if (events->isError()) {
+        } else if (events->isError()) {
             handleError(events, time);
-        }   
-
-        if (events->isRead()) {
+        } else if (events->isRead()) {
             handleRead(events, time);
-        }   
-
-        if (events->isWrite()) {
+        } else if (events->isWrite()) {
             handleWrite(events, time);
         }   
 

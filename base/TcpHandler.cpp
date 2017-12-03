@@ -17,6 +17,11 @@ void fas::TcpHandle::handleRead(boost::shared_ptr<Events> revents, fas::Timestam
     LOGGER_TRACE("In TcpHandle read.");
     auto conn = TcpConnPool::Instance()->getTcpConn(gettid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
+        if (conn == nullptr) {
+            LOGGER_TRACE("conn is null.");
+        } else {
+            LOGGER_TRACE("revents->getFd() != conn->getConnfd()");
+        }
         assert(false);
     }
     auto readBuffer = conn->getReadBuffer();

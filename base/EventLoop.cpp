@@ -115,7 +115,7 @@ bool fas::EventLoop::pollUpdate(boost::shared_ptr<fas::Events> event) {
     } else if (event->isdel()) {
         LOGGER_TRACE("pollUpdate del");
         poll_->EventsDel(event.get());
-        events_.erase(event->getFd());
+        assert(events_.erase(event->getFd()));
     }
     LOGGER_TRACE("pollUpdate end");
     return true;

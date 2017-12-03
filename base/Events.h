@@ -65,6 +65,9 @@ public:
 
     int getFd() const;
     void setFd(int fd);
+
+    long getTid() const;
+    void setTid(long tid);
     
     state getState() const;
     void setState(state sta);
@@ -89,6 +92,7 @@ public:
     struct pollfd pollEvents();
 private:
     int fd_;
+    long tid_;
     state state_;
     type type_;
     uint32_t eorigin_;
