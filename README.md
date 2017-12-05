@@ -14,20 +14,23 @@
 
 # moxie依赖 <br>
 * moxie对boost依赖<br>
-moxie在设计过程中为了提高设置回调函数时安全性以及让这个过程更加灵活简单，主要采用了boost::function来完成回调函数的调用，因此也引入了moxie对boost的依赖。
+moxie在设计过程中为了提高设置回调函数时安全性以及让这个过程更加灵活简单，主要采用了boost::function来完成回调函数的调用，因此也引入了moxie对boost的依赖。<br>
 * 依赖库的安装<br>
-  1. boost安装
-  Ubuntu下使用命令：sudo apt-get install libboost-dev
-  测试程序如下：
-  ```c
-  #include <iostream>
-#include <boost/lexical_cast.hpp>
-int main()
-{
-    string s = "100";
-    int a = boost::lexical_cast<int>(s);
-    int b = 1;
-    std::cout << a+b << std::endl;
-    return 0;
-}
-  ```
+  1. boost安装<br>
+  Ubuntu下使用命令：<br>
+  ```bash
+  sudo apt-get install libboost-dev
+  ```
+  测试程序如下：<br>
+```c
+    #include <iostream> 
+    #include <boost/lexical_cast.hpp>
+    int main()
+    {
+      string s = "100";
+      int a = boost::lexical_cast<int>(s);
+      int b = 1;
+      std::cout << a+b << std::endl;
+      return 0;
+    }
+```
