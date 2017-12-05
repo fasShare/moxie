@@ -18,12 +18,12 @@ moxie在设计过程中为了提高设置回调函数时安全性以及让这个
 * 依赖库的安装<br>
   1. boost安装<br>
   Ubuntu下使用命令：<br>
-  ```bash
+```bash
   sudo apt-get install libboost-dev
-  ```
+```
   测试程序如下：<br>
-```c
-    #include <iostream> 
+```cpp
+    #include <iostream> 
     #include <boost/lexical_cast.hpp>
     int main()
     {
