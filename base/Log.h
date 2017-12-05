@@ -1,5 +1,6 @@
 #ifndef FAS_LOG_H
 #define FAS_LOG_H
+#include <iostream>
 #include <glog/logging.h>
 
 namespace fas {
@@ -10,26 +11,65 @@ namespace fas {
 #define LOGGER_ERROR(MSG) (LOG(ERROR) << MSG)
 #define LOGGER_FATAL(MSG) (LOG(FATAL) << MSG)
 #define LOGGER_SYSERR(MSG) (LOG(ERROR) << MSG)
-static const std::string CRLF = "\r\n";
-bool InitGoogleLog(const std::string& log_dir);
-void CloseGoogleLog();
+
+#define LOG_INFO google::GLOG_INFO
+#define LOG_ERROR google::GLOG_ERROR
+#define LOG_FATAL google::GLOG_FATAL
+#define LOG_WARN google::GLOG_WARNING
+
 class CommonLog {
 public:
-    int init(const std::string& log_dir, std::vector<std::string>& log_name) {
-        InitGoogleLog(log_dir);
-        return 0;
+    static bool OpenLog(std::string logdir, int level, std::string warn, std::string error, std::string info = "", std::string fatal = "") {
+        return Instance()->openLog(logdir, level, warn, error, info, fatal);
     }
-
-    static CommonLog *instance();
-
-    void closeLog() {
-        google::ShutdownGoogleLogging();
+    static void CloseLog() {
+        Instance()->closeLog();
     }
+    static void AllLogToStderr(bool open) {
+        FLAGS_logtostderr = open;
+    }
+    static void OutputLogToStderrAndFile(bool yesno) {
+        FLAGS_alsologtostderr = yesno;
+    }
+    static bool MinLevelTStderrWithColor(int level, bool color) {
+        if (level != LOG_INFO
+            && level != LOG_ERROR
+            && level != LOG_FATAL
+            && level != LOG_WARN) {
+            return false;
+        }
+        FLAGS_stderrthreshold = level;
+        FLAGS_colorlogtostderr = color;
+        return true; 
+    }
+    static bool MinLogLevelOutput(int level) {
+        if (level != LOG_INFO
+            && level != LOG_ERROR
+            && level != LOG_FATAL
+            && level != LOG_WARN) {
+            return false;
+        }
+        FLAGS_minloglevel = level;
+        return true;
+    }
+    
     ~CommonLog() {
         google::ShutdownGoogleLogging();
     }
 private:
+    CommonLog() = default;
+    bool openLog(std::string logdir, int level, std::string warn, std::string error, std::string info, std::string fatal); 
+
+    static CommonLog *Instance();
+
+    void closeLog();
     static CommonLog *logger_;
+    std::string logdir_;
+    std::string warn_;
+    std::string error_;
+    std::string fatal_;
+    std::string info_;
+    int outlevel_;
 };
 
 }

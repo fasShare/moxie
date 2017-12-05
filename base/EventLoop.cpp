@@ -40,8 +40,7 @@ fas::EventLoop::EventLoop(PollerFactory *pollerFactory) :
         LOGGER_SYSERR("New Poller error!");
     }
     count_++;
-    Eventsops::RegisterEventHandler(Events::type::EVENTFD, new EventfdHandle());
-    Eventsops::BuildEventIntoLoop(this, new Events(wakeFd_, kReadEvent), Events::type::EVENTFD);
+    Eventsops::BuildEventIntoLoop(this, new Events(wakeFd_, kReadEvent), EVENT_TYPE_EVENTFD);
 }
 
 int fas::CreateEventfd() {

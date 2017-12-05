@@ -62,7 +62,6 @@ private:
     long tid_;
 
     bool quit_;
-
     int wakeFd_;
 };
 

@@ -1,11 +1,12 @@
 #include <strings.h>
 
 #include <Events.h>
+#include <Moxie.h>
 
 fas::Events::Events(const int fd, uint32_t events) :
     fd_(fd),
     state_(state::NEW),
-    type_(type::TYPEINVAILD),
+    type_(EVENT_TYPE_START),
     eorigin_(events),
     mutable_(kNoneEvent) {
 }
@@ -25,18 +26,18 @@ fas::Events::Events(const struct pollfd& events) :
 
 bool fas::Events::reset() {
     fd_ = -1;
-    type_ = type::TYPEINVAILD;
+    type_ = EVENT_TYPE_START;
     state_ = state::INVAILD;
     eorigin_ = kNoneEvent;
     mutable_ = kNoneEvent;
     return true;
 }
 
-fas::Events::type fas::Events::getType() const {
+int fas::Events::getType() const {
     return type_;
 }
 
-void fas::Events::setType(type tp) {
+void fas::Events::setType(int tp) {
     type_ = tp;
 }
 

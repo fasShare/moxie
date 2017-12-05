@@ -29,14 +29,6 @@ public:
         DEL,
         INVAILD,
     };
-    enum type {
-        TCPCONN,
-        TCPSERVER,
-        TIMER,
-        SIGNAL,
-        EVENTFD,
-        TYPEINVAILD,
-    };
 
     Events(const int fd = -1, uint32_t events = kNoneEvent);
     Events(const Events& events);
@@ -60,8 +52,8 @@ public:
     bool originRead();
     bool originWrite();
 
-    void setType(type tp);
-    type getType() const;
+    void setType(int tp);
+    int getType() const;
 
     int getFd() const;
     void setFd(int fd);
@@ -94,7 +86,7 @@ private:
     int fd_;
     long tid_;
     state state_;
-    type type_;
+    int type_;
     uint32_t eorigin_;
     uint32_t mutable_;
 };
