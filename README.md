@@ -1,6 +1,6 @@
 ![Moxie logo](https://github.com/fasShare/moxie/blob/master/logo/moxie.png)
 ***
-### moxie是基于linux操作系统下IO复用＋多线程的Reactor模型的服务器框架，它的主要设计思想借鉴与muduo，但在代码的组织以及类与类之间的关联关系上做了很大改进使其更容易修改并进行模块的添加，与此同时在一些多线程共享的地方做了很大努力，很多线程的资源共享更加容易。<br>
+### moxie是Linux下基于reactor模型的框架，它主要使用C++来实现，原生支持多线程，支持poll和epoll等IO复用模型。效率，moxie与用户的交互主要采用回调函数来实现，能够很好的提高系统的数据接收与处理的异步性，提高系统并发性。接口，moxie具有不同模块对外提供的接口比较简单统一，不用在接口使用、模块间类与类之间的交互上花费太多时间，能够极大的降低用户的开发成本。模块，moxie的前身是FAS，FAS是为了学习muduo深入理解muduo而设计开发的，但考虑到muduo在某些程度上对模块分割以及代码修改还是需要在代码层面付出很大努力的，因此moxie在对大幅度FAS进行重构时，从一开始设计就保持各个模块较强的独立性，很多模块都可以拉出来单独使用，与此同时moxie也是一个对系统api封装完好的网络库。<br>
 ***
 # moxie的主要特性<br>
 * 包含常用的稳定模块<br>
@@ -11,3 +11,23 @@
 * 模块对立性强<br>
 * 合理使用设计模式，可扩展性强<br>
 * 接口简洁，代码可读性强<br>
+
+# moxie依赖 <br>
+* moxie对boost依赖<br>
+moxie在设计过程中为了提高设置回调函数时安全性以及让这个过程更加灵活简单，主要采用了boost::function来完成回调函数的调用，因此也引入了moxie对boost的依赖。
+* 依赖库的安装<br>
+  1. boost安装
+  Ubuntu下使用命令：sudo apt-get install libboost-dev
+  测试程序如下：
+  ```c
+  #include <iostream>
+#include <boost/lexical_cast.hpp>
+int main()
+{
+    string s = "100";
+    int a = boost::lexical_cast<int>(s);
+    int b = 1;
+    std::cout << a+b << std::endl;
+    return 0;
+}
+  ```
