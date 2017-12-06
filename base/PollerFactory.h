@@ -1,9 +1,9 @@
-#ifndef FAS_POLLERFACTORY_H
-#define FAS_POLLERFACTORY_H
+#ifndef MOXIE_POLLERFACTORY_H
+#define MOXIE_POLLERFACTORY_H
 #include <Poller.h>
 #include <VirtualBase.h>
 
-namespace fas{
+namespace moxie {
 
 class PollerFactory : public VirtualBase {
 public:
@@ -12,4 +12,4 @@ public:
 
 }
 
-#endif //FAS_POLLERFACTORY_H
+#endif //MOXIE_POLLERFACTORY_H

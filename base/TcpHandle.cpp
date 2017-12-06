@@ -14,7 +14,7 @@
 
 #include <boost/core/ignore_unused.hpp>
 
-void fas::TcpHandle::handleRead(boost::shared_ptr<Events> revents, fas::Timestamp time) {
+void moxie::TcpHandle::handleRead(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
     LOGGER_TRACE("In TcpHandle read.");
     auto conn = TcpConnPool::GetTcpConn(gettid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
@@ -38,7 +38,7 @@ void fas::TcpHandle::handleRead(boost::shared_ptr<Events> revents, fas::Timestam
     } 
 }
 
-void fas::TcpHandle::handleWrite(boost::shared_ptr<Events> revents, fas::Timestamp time) {
+void moxie::TcpHandle::handleWrite(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
     LOGGER_TRACE("In TcpHandle write.");
     auto conn = TcpConnPool::GetTcpConn(revents->getTid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
@@ -82,7 +82,7 @@ reWrite:
     }
 }
 
-void fas::TcpHandle::handleError(boost::shared_ptr<Events> revents, fas::Timestamp time) {
+void moxie::TcpHandle::handleError(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
     LOGGER_TRACE("In TcpHandle error.");
     auto conn = TcpConnPool::GetTcpConn(revents->getTid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
@@ -96,7 +96,7 @@ void fas::TcpHandle::handleError(boost::shared_ptr<Events> revents, fas::Timesta
     }
 }
 
-void fas::TcpHandle::handleClose(boost::shared_ptr<Events> revents, fas::Timestamp time) {
+void moxie::TcpHandle::handleClose(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
     LOGGER_TRACE("In TcpHandle close.");
     auto conn = TcpConnPool::GetTcpConn(revents->getTid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
@@ -111,19 +111,19 @@ void fas::TcpHandle::handleClose(boost::shared_ptr<Events> revents, fas::Timesta
     LOGGER_TRACE("TcpHandle close end.");
 }
 
-void fas::TcpHandle::setReadCallback(TcpConnCallback rbc) {
+void moxie::TcpHandle::setReadCallback(TcpConnCallback rbc) {
     read_cb_ = rbc;
 }
 
-void fas::TcpHandle::setErrorCallback(TcpConnCallback ebc) {
+void moxie::TcpHandle::setErrorCallback(TcpConnCallback ebc) {
     error_cb_ = ebc;
 }
 
-void fas::TcpHandle::setWriteCallback(TcpConnCallback wbc) {
+void moxie::TcpHandle::setWriteCallback(TcpConnCallback wbc) {
     write_cb_ = wbc;
 }
 
-void fas::TcpHandle::setCloseCallback(TcpConnCallback cbc) {
+void moxie::TcpHandle::setCloseCallback(TcpConnCallback cbc) {
     close_cb_ = cbc;
 }
 

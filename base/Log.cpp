@@ -5,16 +5,16 @@
 
 #include <Log.h>
 
-fas::CommonLog* fas::CommonLog::logger_ = nullptr;
+moxie::CommonLog* moxie::CommonLog::logger_ = nullptr;
 
-fas::CommonLog* fas::CommonLog::Instance() {
+moxie::CommonLog* moxie::CommonLog::Instance() {
     if (NULL == logger_) {
         logger_ = new(std::nothrow) CommonLog();
     }
     return logger_;
 }
 
-bool fas::CommonLog::openLog(std::string logdir, int level, std::string warn, std::string error, std::string info, std::string fatal) {
+bool moxie::CommonLog::openLog(std::string logdir, int level, std::string warn, std::string error, std::string info, std::string fatal) {
     google::InitGoogleLogging("");
 
     logdir_ == "" ? "./" : logdir_;
@@ -41,7 +41,7 @@ bool fas::CommonLog::openLog(std::string logdir, int level, std::string warn, st
     return true;
 }
 
-void fas::CommonLog::closeLog() {
+void moxie::CommonLog::closeLog() {
     google::ShutdownGoogleLogging();
 }
 

@@ -1,5 +1,5 @@
-#ifndef FAS_THREADPOOL_H
-#define FAS_THREADPOOL_H
+#ifndef MOXIE_THREADPOOL_H
+#define MOXIE_THREADPOOL_H
 #include <vector>
 #include <memory>
 
@@ -9,7 +9,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace fas {
+namespace moxie {
 
 class ThreadPool : boost::noncopyable{
 public:
@@ -33,5 +33,5 @@ private:
 };
 
 }
-#endif // FAS_THREADPOOL_H
+#endif // MOXIE_THREADPOOL_H
 

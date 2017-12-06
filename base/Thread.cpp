@@ -4,32 +4,32 @@
 #include <Thread.h>
 #include <Log.h>
 
-fas::Thread::Thread(){
+moxie::Thread::Thread(){
 }
 
-fas::Thread::Thread(const std::string& name) :
+moxie::Thread::Thread(const std::string& name) :
     name_(name){
 
     }
 
-fas::Thread::Thread(boost::function<void ()> threadFunc) :
+moxie::Thread::Thread(boost::function<void ()> threadFunc) :
     Thread(threadFunc, "") {
     }
 
-fas::Thread::Thread(boost::function<void ()> threadFunc, const std::string name) :
+moxie::Thread::Thread(boost::function<void ()> threadFunc, const std::string name) :
     threadId_(0),
     name_(name),
     threadFunc_(threadFunc) {
 }
 
-bool fas::Thread::setThreadFunc(boost::function<void ()> threadFunc) {
+bool moxie::Thread::setThreadFunc(boost::function<void ()> threadFunc) {
     if (threadFunc_)
         return false;
     threadFunc_ = threadFunc;
     return true;
 }
 
-bool fas::Thread::join() {
+bool moxie::Thread::join() {
     errno = ::pthread_join(threadId_, NULL);
     if (errno != 0) {
         LOGGER_SYSERR("ERROR pthread_join : " <<  ::strerror(errno));
@@ -38,11 +38,11 @@ bool fas::Thread::join() {
     return true;
 }
 
-bool fas::Thread::MainThread() {
+bool moxie::Thread::MainThread() {
     return gettid() == ::getpid();
 }
 
-bool fas::Thread::start() {
+bool moxie::Thread::start() {
     errno = ::pthread_create(&threadId_, NULL, &run, this);
     if (errno != 0) {
         LOGGER_SYSERR("ERROR pthread_create : " << ::strerror(errno));
@@ -51,13 +51,13 @@ bool fas::Thread::start() {
     return true;
 }
 
-void* fas::run(void *obj) {
+void* moxie::run(void *obj) {
     Thread *thread = static_cast<Thread*>(obj);
     thread->ThreadFunc();
     return NULL;
 }
 
-void fas::Thread::ThreadFunc() {
+void moxie::Thread::ThreadFunc() {
     if (!this->threadFunc_) {
         LOGGER_ERROR("Thread no Function object!");
         return;
@@ -69,15 +69,15 @@ void fas::Thread::ThreadFunc() {
     }
 }
 
-std::string fas::Thread::getName() {
+std::string moxie::Thread::getName() {
     return name_;
 }
 
-void fas::Thread::setName(const std::string& name) {
+void moxie::Thread::setName(const std::string& name) {
     this->name_ = name;
 }
 
-fas::Thread::~Thread() {
+moxie::Thread::~Thread() {
 
 }
 

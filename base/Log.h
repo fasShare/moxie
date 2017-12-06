@@ -1,9 +1,9 @@
-#ifndef FAS_LOG_H
-#define FAS_LOG_H
+#ifndef MOXIE_LOG_H
+#define MOXIE_LOG_H
 #include <iostream>
 #include <glog/logging.h>
 
-namespace fas {
+namespace moxie {
 #define LOGGER_TRACE(MSG) (LOG(INFO) << MSG)
 #define LOGGER_DEBUG(MSG) (LOG(INFO) << MSG)
 #define LOGGER_INFO(MSG) (LOG(INFO) << MSG)
@@ -73,5 +73,5 @@ private:
 };
 
 }
-#endif // FAS_LOG_H
+#endif // MOXIE_LOG_H
 

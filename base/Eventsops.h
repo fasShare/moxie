@@ -1,5 +1,5 @@
-#ifndef FAS_EVENTSOPS_H
-#define FAS_EVENTSOPS_H
+#ifndef MOXIE_EVENTSOPS_H
+#define MOXIE_EVENTSOPS_H
 #include <EventLoop.h>
 #include <Events.h>
 #include <Handler.h>
@@ -8,11 +8,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace fas {
+namespace moxie {
 
 class Eventsops {
 public:
-    static bool BuildEventIntoLoop(EventLoop *loop, Events* event, Events::type type) {
+    static bool BuildEventIntoLoop(EventLoop *loop, Events* event, int type) {
         if (!loop) {
             return false;
         }
@@ -30,14 +30,14 @@ public:
         return loop->updateEvents(event);
     }
 
-    static bool RegisterEventHandler(Events::type type, Handler *handler) {
+    static bool RegisterEventHandler(int type, Handler *handler) {
         return HandlePool::AddHandler(type, handler);
     }
-    static Handler* EventHandler(Events::type type) {
+    static Handler* EventHandler(int type) {
         return HandlePool::GetHandler(type);
     }
 };
 
 }
 
-#endif //FAS_EVENTSOPS_H
+#endif //MOXIE_EVENTSOPS_H

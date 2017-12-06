@@ -1,5 +1,5 @@
-#ifndef FAS_THREAD_H
-#define FAS_THREAD_H
+#ifndef MOXIE_THREAD_H
+#define MOXIE_THREAD_H
 #include <pthread.h>
 #include <string>
 #include <syscall.h>
@@ -8,7 +8,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 /*!
  * \brief The Thread class
@@ -92,4 +92,4 @@ void* run(void *);
 #define gettid() (::syscall(SYS_gettid))
 
 }
-#endif //FAS_THREAD_H
+#endif //MOXIE_THREAD_H

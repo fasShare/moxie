@@ -6,15 +6,15 @@
 #include <inttypes.h>
 #undef __STDC_FORMAT_MACROS
 
-fas::Timestamp::Timestamp() :
+moxie::Timestamp::Timestamp() :
     microSecondsSinceEpoch_(0) {
 }
 
-fas::Timestamp::Timestamp(int64_t microseconds) :
+moxie::Timestamp::Timestamp(int64_t microseconds) :
     microSecondsSinceEpoch_(microseconds) {
 }
 
-std::string fas::Timestamp::toString() const {
+std::string moxie::Timestamp::toString() const {
     char buf[32] = {0};
     int64_t seconds = microSecondsSinceEpoch_ / kMicroSecondsPerSecond;
     int64_t microseconds = microSecondsSinceEpoch_ % kMicroSecondsPerSecond;
@@ -22,7 +22,7 @@ std::string fas::Timestamp::toString() const {
     return buf;
 }
 
-std::string fas::Timestamp::toFormattedString() const {
+std::string moxie::Timestamp::toFormattedString() const {
     char buf[32] = {0};
     time_t seconds = static_cast<time_t>(microSecondsSinceEpoch_ / kMicroSecondsPerSecond);
     int microseconds = static_cast<int>(microSecondsSinceEpoch_ % kMicroSecondsPerSecond);
@@ -36,51 +36,51 @@ std::string fas::Timestamp::toFormattedString() const {
     return buf;
 }
 
-fas::Timestamp fas::Timestamp::now() {
+moxie::Timestamp moxie::Timestamp::now() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     int64_t seconds = tv.tv_sec;
-    return fas::Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);
+    return moxie::Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);
 }
 
-fas::Timestamp fas::Timestamp::invalid() {
+moxie::Timestamp moxie::Timestamp::invalid() {
     return Timestamp();
 }
 
-bool fas::Timestamp::isvalid() const {
+bool moxie::Timestamp::isvalid() const {
     return microSecondsSinceEpoch_ > 0;
 }
 
-void fas::Timestamp::swap(Timestamp& that) {
+void moxie::Timestamp::swap(Timestamp& that) {
     std::swap(microSecondsSinceEpoch_, that.microSecondsSinceEpoch_);
 }
 
-int64_t fas::Timestamp::get_microSecondsSinceEpoch() const {
+int64_t moxie::Timestamp::get_microSecondsSinceEpoch() const {
     return microSecondsSinceEpoch_;
 }
 
-time_t fas::Timestamp::secondsSinceEpoch() const {
+time_t moxie::Timestamp::secondsSinceEpoch() const {
     return static_cast<time_t>(microSecondsSinceEpoch_ / kMicroSecondsPerSecond);
 }
 
-bool fas::operator<(Timestamp lhs, Timestamp rhs) {
+bool moxie::operator<(Timestamp lhs, Timestamp rhs) {
     return lhs.get_microSecondsSinceEpoch() < rhs.get_microSecondsSinceEpoch();
 }
 
-bool fas::operator>(Timestamp lhs, Timestamp rhs) {
+bool moxie::operator>(Timestamp lhs, Timestamp rhs) {
     return lhs.get_microSecondsSinceEpoch() > rhs.get_microSecondsSinceEpoch();
 }
 
-bool fas::operator==(Timestamp lhs, Timestamp rhs) {
+bool moxie::operator==(Timestamp lhs, Timestamp rhs) {
     return lhs.get_microSecondsSinceEpoch() == rhs.get_microSecondsSinceEpoch();
 }
 
-double fas::timeDifference(Timestamp high, Timestamp low) {
+double moxie::timeDifference(Timestamp high, Timestamp low) {
     int64_t diff = high.get_microSecondsSinceEpoch() - low.get_microSecondsSinceEpoch();
     return static_cast<double>(diff) / Timestamp::kMicroSecondsPerSecond;
 }
 
-fas::Timestamp fas::addTime(Timestamp timestamp, double seconds) {
+moxie::Timestamp moxie::addTime(Timestamp timestamp, double seconds) {
     int64_t delta = static_cast<int64_t>(seconds * Timestamp::kMicroSecondsPerSecond);
     return Timestamp(timestamp.get_microSecondsSinceEpoch() + delta);
 }

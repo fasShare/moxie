@@ -3,7 +3,7 @@
 #include <NetAddress.h>
 #include <Thread.h>
 
-using namespace fas;
+using namespace moxie;
 using namespace std;
 
 void work() {

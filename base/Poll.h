@@ -1,5 +1,5 @@
-#ifndef FAS_POLL_H
-#define FAS_POLL_H
+#ifndef MOXIE_POLL_H
+#define MOXIE_POLL_H
 #include <sys/poll.h>
 
 
@@ -8,7 +8,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace fas {
+namespace moxie {
 
 class Poll : public Poller {
 public:
@@ -26,5 +26,5 @@ private:
 };
 
 }
-#endif // FAS_POLL_H
+#endif // MOXIE_POLL_H
 

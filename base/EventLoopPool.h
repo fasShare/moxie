@@ -1,5 +1,5 @@
-#ifndef FAS_EVENTLOOPPOOL_H
-#define FAS_EVENTLOOPPOOL_H
+#ifndef MOXIE_EVENTLOOPPOOL_H
+#define MOXIE_EVENTLOOPPOOL_H
 #include <map>
 #include <vector>
 #include <unistd.h>
@@ -8,7 +8,7 @@
 #include <EventLoop.h>
 #include <Mutex.h>
 
-namespace fas {
+namespace moxie {
 
 class EventLoop;
 
@@ -47,4 +47,4 @@ private:
 
 }
 
-#endif //FAS_EVENTLOOPPOOL_H
+#endif //MOXIE_EVENTLOOPPOOL_H

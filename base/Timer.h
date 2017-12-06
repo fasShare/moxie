@@ -1,12 +1,12 @@
-#ifndef FAS_TIMER_H
-#define FAS_TIMER_H
+#ifndef MOXIE_TIMER_H
+#define MOXIE_TIMER_H
 #include <Timestamp.h>
 
 
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 typedef boost::function<void ()> TimerCallback;
 /*!
@@ -56,4 +56,4 @@ private:
 };
 
 }
-#endif  // FAS_TIMER_H
+#endif  // MOXIE_TIMER_H

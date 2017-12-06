@@ -8,7 +8,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-using namespace fas;
+using namespace moxie;
 
 void read_cb(boost::shared_ptr<TcpConnection> conn, Timestamp time) {
     conn->sendString(conn->getReadBuffer()->retrieveAllAsString());

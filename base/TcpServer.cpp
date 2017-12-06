@@ -8,16 +8,16 @@
 #include <Log.h>
 #include <EventLoop.h>
 #include <TcpServer.h>
+#include <HandlePool.h>
 #include <TcpConnPool.h>
 #include <EventLoopPool.h>
 
 #include <boost/bind.hpp>
 #include <boost/core/ignore_unused.hpp>
 
-fas::TcpServer::TcpServer(const NetAddress& addr, int threadNum) :
-    signor_(),
-    server_(AF_INET, SOCK_STREAM, 0),
+moxie::TcpServer::TcpServer(const NetAddress& addr, int threadNum) :
     loop_(nullptr),
+    server_(AF_INET, SOCK_STREAM, 0),
     events_(new Events(server_.getSocket(), kReadEvent)),
     addr_(addr),
     listenBacklog_(50) {
@@ -29,7 +29,7 @@ fas::TcpServer::TcpServer(const NetAddress& addr, int threadNum) :
 	LOGGER_TRACE("server listen fd = " << server_.getSocket());
 }
 
-bool fas::TcpServer::start() { 
+bool moxie::TcpServer::start() { 
 	loop_ = EventLoopPool::GetMainLoop();
 	if (!loop_) {
 		LOGGER_ERROR("Please check MoxieInit() was called!");
@@ -40,15 +40,15 @@ bool fas::TcpServer::start() {
     return true;
 }
 
-void fas::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time) {
+void moxie::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time) {
     LOGGER_TRACE("In TcpServer hand read.");
     loop_->assertInOwnerThread();
     boost::ignore_unused(time);
 
-    fas::EventLoop *workloop = nullptr;
+    moxie::EventLoop *workloop = nullptr;
 
     if (event->getFd() == server_.getSocket()) {
-        fas::NetAddress peerAddr;
+        moxie::NetAddress peerAddr;
         Timestamp acceptTime = Timestamp::now();
         int sd = server_.accept(peerAddr, true);
         if (sd < 0) {
@@ -61,11 +61,11 @@ void fas::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time)
         }
         long looptid = workloop->getTid();
 
-        boost::shared_ptr<Events> conn_event(new fas::Events(sd, kReadEvent));
+        boost::shared_ptr<Events> conn_event(new moxie::Events(sd, kReadEvent));
         conn_event->setType(EVENT_TYPE_TCPCON);
         conn_event->setTid(looptid);
         
-        fas::TcpConnection::TcpConnShreadPtr sconn(new fas::TcpConnection());
+        moxie::TcpConnection::TcpConnShreadPtr sconn(new moxie::TcpConnection());
         sconn->init(conn_event, peerAddr, acceptTime);
         
         sconn->setTid(looptid);
@@ -79,26 +79,26 @@ void fas::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time)
     }
 }
 
-void fas::TcpServer::handleWrite(boost::shared_ptr<Events> revents, Timestamp time) {
-	boost::ignore_unused(events, time);
+void moxie::TcpServer::handleWrite(boost::shared_ptr<Events> revents, Timestamp time) {
+	boost::ignore_unused(revents, time);
 	LOGGER_ERROR("In handle write of TcpServer.");
 }
 
-void fas::TcpServer::handleError(boost::shared_ptr<Events> revents, Timestamp time) {
-	boost::ignore_unused(events, time);
+void moxie::TcpServer::handleError(boost::shared_ptr<Events> revents, Timestamp time) {
+	boost::ignore_unused(revents, time);
 	LOGGER_ERROR("In handle error of TcpServer.");
 }
 
-void fas::TcpServer::handleClose(boost::shared_ptr<Events> revents, Timestamp time) {
-	boost::ignore_unused(events, time);
+void moxie::TcpServer::handleClose(boost::shared_ptr<Events> revents, Timestamp time) {
+	boost::ignore_unused(revents, time);
 	LOGGER_ERROR("In handle close of TcpServer.");
 }
 
-void fas::TcpServer::setNewConnCallback(TcpConnCallback ncb) {
+void moxie::TcpServer::setNewConnCallback(TcpConnCallback ncb) {
     newConnCb_ = ncb;
 }
 
-fas::TcpServer::~TcpServer() {
+moxie::TcpServer::~TcpServer() {
     loop_->quit();
     LOGGER_TRACE("TcpServer will be destroyed in process " << getpid());
 }

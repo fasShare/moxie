@@ -10,7 +10,7 @@
 #include <boost/bind.hpp>
 #include <boost/core/ignore_unused.hpp>
 
-fas::TimerScheduler::TimerScheduler() :
+moxie::TimerScheduler::TimerScheduler() :
     timerfd_(::timerfd_create(CLOCK_MONOTONIC, 0)),
     timerheap_(),
     expired_(),
@@ -24,17 +24,17 @@ fas::TimerScheduler::TimerScheduler() :
 	LOGGER_TRACE("Timer fd = " << timerfd_);
 }
 
-fas::TimerHeap::timerfd_t fas::TimerScheduler::getTimerfd() const {
+moxie::TimerHeap::timerfd_t moxie::TimerScheduler::getTimerfd() const {
     return timerfd_;
 }
 
-boost::shared_ptr<fas::Events> fas::TimerScheduler::getEvent() {
+boost::shared_ptr<moxie::Events> moxie::TimerScheduler::getEvent() {
 	return event_;
 }
 
-struct itimerspec fas::TimerScheduler::calculateTimerfdNewValue(fas::Timestamp earlist) {
+struct itimerspec moxie::TimerScheduler::calculateTimerfdNewValue(moxie::Timestamp earlist) {
     int64_t microseconds =  earlist.get_microSecondsSinceEpoch() - \
-                            fas::Timestamp::now().get_microSecondsSinceEpoch();
+                            moxie::Timestamp::now().get_microSecondsSinceEpoch();
     if (microseconds < 100) {
         microseconds = 100;
     }
@@ -43,13 +43,13 @@ struct itimerspec fas::TimerScheduler::calculateTimerfdNewValue(fas::Timestamp e
     newvalue.it_interval.tv_sec = 0;
     newvalue.it_interval.tv_nsec = 0;
 
-    newvalue.it_value.tv_sec = static_cast<time_t>(microseconds / fas::Timestamp::kMicroSecondsPerSecond);
-    newvalue.it_value.tv_nsec = static_cast<long>((microseconds % fas::Timestamp::kMicroSecondsPerSecond) * 1000);
+    newvalue.it_value.tv_sec = static_cast<time_t>(microseconds / moxie::Timestamp::kMicroSecondsPerSecond);
+    newvalue.it_value.tv_nsec = static_cast<long>((microseconds % moxie::Timestamp::kMicroSecondsPerSecond) * 1000);
 
     return newvalue;
 }
 
-bool fas::TimerScheduler::resetTimer(fas::Timestamp earlist) {
+bool moxie::TimerScheduler::resetTimer(moxie::Timestamp earlist) {
     struct itimerspec newvalue;
     struct itimerspec oldvalue;
     bzero(&newvalue, sizeof(struct itimerspec));
@@ -63,8 +63,7 @@ bool fas::TimerScheduler::resetTimer(fas::Timestamp earlist) {
     return true;
 }
 // If Timer add itself in it's callback. this operator will failed.
-bool fas::TimerScheduler::addTimer(fas::Timer *timer) {
-    loop_->assertInOwnerThread();
+bool moxie::TimerScheduler::addTimer(moxie::Timer *timer) {
     if (timerCallbackRunning_ == true) {
         auto iter = std::find(expired_.begin(), expired_.end(), \
                 std::make_pair(timer->getExpiration(), timer));
@@ -80,13 +79,12 @@ bool fas::TimerScheduler::addTimer(fas::Timer *timer) {
     return true;
 }
 
-void fas::TimerScheduler::delTimer(fas::Timer *timer) {
-    loop_->assertInOwnerThread();
+void moxie::TimerScheduler::delTimer(moxie::Timer *timer) {
     if (timerCallbackRunning_ == true) {
         auto iter = std::find(expired_.begin(), expired_.end(), \
                 std::make_pair(timer->getExpiration(), timer));
         if (iter != expired_.end()) {
-            iter->second->setState(fas::Timer::STATE::DELETED);
+            iter->second->setState(moxie::Timer::STATE::DELETED);
             return;
         }
     }
@@ -97,15 +95,14 @@ void fas::TimerScheduler::delTimer(fas::Timer *timer) {
     }
 }
 
-void fas::TimerScheduler::handleRead(boost::shared_ptr<Events> events, fas::Timestamp time) {
-    loop_->assertInOwnerThread();
+void moxie::TimerScheduler::handleRead(boost::shared_ptr<Events> events, moxie::Timestamp time) {
     boost::ignore_unused(events, time);
     // now is more accurate than the time of loop wait returned.
-    fas::Timestamp now = fas::Timestamp::now();
+    moxie::Timestamp now = moxie::Timestamp::now();
     timerheap_.getExpiredTimers(expired_, now);
     timerCallbackRunning_ = true;
     for (auto iter = expired_.begin(); iter != expired_.end(); iter++) {
-        if (iter->second->getState() != fas::Timer::STATE::DELETED) {
+        if (iter->second->getState() != moxie::Timer::STATE::DELETED) {
             iter->second->run();
         }
     }
@@ -117,7 +114,7 @@ void fas::TimerScheduler::handleRead(boost::shared_ptr<Events> events, fas::Time
     expired_.clear();
 }
 
-fas::TimerScheduler::~TimerScheduler() {
+moxie::TimerScheduler::~TimerScheduler() {
     for (auto iter = expired_.begin(); iter != expired_.end(); ++iter) {
         if (iter->second != nullptr) {
             delete iter->second;

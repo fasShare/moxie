@@ -2,50 +2,63 @@
 #include <new>
 
 #include <Moxie.h>
+#include <Events.h>
+#include <EventLoop.h>
 #include <EventLoopPool.h>
 #include <ThreadPool.h>
 #include <HandlePool.h>
 #include <TcpHandle.h>
-#include <TimerHandler.h>
+#include <TimerHandle.h>
+#include <Eventsops.h>
 
-#include <boost/function.h>
+#include <boost/function.hpp>
 
 moxie::Moxie *moxie::Moxie::moxie_ = nullptr;
 
 void LoopThreadFunc() {
-	EventLoop *loop = new (std::nothrow) EventLoop();
+    moxie::EventLoop *loop = new (std::nothrow) moxie::EventLoop();
 	if (nullptr == loop) {
 		return;
 	}
 
-	if (!EventLoopPool::AddEventLoop(gettid(), loop)) {
+	if (!moxie::EventLoopPool::AddEventLoop(gettid(), loop)) {
 		return;
 	}
 
 	loop->loop();
 }
 
+moxie::Moxie::Moxie() :
+    threadPool_(nullptr),
+    loop_(nullptr),
+    signor_() {
+}
+
 bool moxie::Moxie::MoxieInit(MoxieArgsType args) {
     Instance()->RegisterHandler();
+    return Instance()->init(args);
+}
+
+bool moxie::Moxie::init(MoxieArgsType args) {
     if (args.InitFunc) {
         args.InitFunc();
     }
     if (args.ThreadNum > 0) {
 		threadPool_ = new (std::nothrow) ThreadPool(args.ThreadNum, LoopThreadFunc, "WorkLoopThreadPool");
-		assert(threadPool_);
-		threadPool_->start();
+		assert(Instance()->threadPool_);
+		Instance()->threadPool_->start();
     }
-	loop_ = new EventLoop();
-	fas::EventLoopPool::addMainLoop(loop_);
+	loop_ = new (std::nothrow) EventLoop();
+	return EventLoopPool::addMainLoop(loop_);
 }
 
 bool moxie::Moxie::Run() {
-	loop_->loop();
+    return Instance()->loop_->loop();
 }
 
-static moxie::Moxie* Moxie::Instance() {
+moxie::Moxie* moxie::Moxie::Instance() {
     if (!moxie_) {
-        moxie_ = new (nothrow) Moxie();
+        moxie_ = new (std::nothrow) Moxie();
     }
     assert(moxie_);
     return moxie_;

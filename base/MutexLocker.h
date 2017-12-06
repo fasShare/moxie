@@ -1,8 +1,8 @@
-#ifndef FAS_MUTEXLOCKER_H
-#define FAS_MUTEXLOCKER_H
+#ifndef MOXIE_MUTEXLOCKER_H
+#define MOXIE_MUTEXLOCKER_H
 #include <pthread.h>
 
-namespace fas {
+namespace moxie {
 
 class Mutex;
 
@@ -19,4 +19,4 @@ private:
 };
 
 }
-#endif // FAS_MUTEXLOCKER_H
+#endif // MOXIE_MUTEXLOCKER_H

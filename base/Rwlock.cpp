@@ -2,39 +2,39 @@
 
 #include "Rwlock.h"
 
-fas::Rwlock::Rwlock() {
+moxie::Rwlock::Rwlock() {
     lock_ = PTHREAD_RWLOCK_INITIALIZER;
 }
 
-fas::Rwlock::~Rwlock(){
+moxie::Rwlock::~Rwlock(){
     ::pthread_rwlock_destroy(&lock_);
 }
 
-bool fas::Rwlock::rlock() {
+bool moxie::Rwlock::rlock() {
     int ret = ::pthread_rwlock_rdlock(&lock_);
     errno = ret == 0 ? errno : ret;
     return ret == 0;
 }
 
-bool fas::Rwlock::tryrlock() {
+bool moxie::Rwlock::tryrlock() {
     int ret = ::pthread_rwlock_tryrdlock(&lock_);
     errno = ret == 0 ? errno : ret;
     return ret == 0;
 }
 
-bool fas::Rwlock::trywlock() {
+bool moxie::Rwlock::trywlock() {
     int ret = ::pthread_rwlock_wrlock(&lock_);
     errno = ret == 0 ? errno : ret;
     return ret == 0;
 }
 
-bool fas::Rwlock::wlock() {
+bool moxie::Rwlock::wlock() {
     int ret = ::pthread_rwlock_wrlock(&lock_);
     errno = ret == 0 ? errno : ret;
     return ret == 0;
 }
 
-bool fas::Rwlock::unlock() {
+bool moxie::Rwlock::unlock() {
     int ret = ::pthread_rwlock_unlock(&lock_);
     errno = ret == 0 ? errno : ret;
     return ret == 0;

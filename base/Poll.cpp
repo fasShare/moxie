@@ -3,13 +3,13 @@
 #include <Events.h>
 #include <Log.h>
 
-size_t fas::Poll::kMaxPollNum_ = 1024;
+size_t moxie::Poll::kMaxPollNum_ = 1024;
 
-fas::Poll::Poll() :
+moxie::Poll::Poll() :
     revents_() {
 }
 
-bool fas::Poll::EventsAdd(Events* events) {
+bool moxie::Poll::EventsAdd(Events* events) {
     assert(events != nullptr);
     if (revents_.size() >= kMaxPollNum_) {
         return false;
@@ -18,7 +18,7 @@ bool fas::Poll::EventsAdd(Events* events) {
     return true;
 }
 
-bool fas::Poll::EventsMod(Events* events) {
+bool moxie::Poll::EventsMod(Events* events) {
     assert(events != nullptr);
     auto pos = getEventPos(events->pollEvents());
     if (pos == revents_.end()) {
@@ -28,7 +28,7 @@ bool fas::Poll::EventsMod(Events* events) {
     return true;
 }
 
-bool fas::Poll::EventsDel(Events* events) {
+bool moxie::Poll::EventsDel(Events* events) {
     assert(events != nullptr);
     auto pos = getEventPos(events->pollEvents());
     if (pos == revents_.end()) {
@@ -38,7 +38,7 @@ bool fas::Poll::EventsDel(Events* events) {
     return true;
 }
 
-std::vector<struct pollfd>::iterator fas::Poll::getEventPos(const struct pollfd& event) {
+std::vector<struct pollfd>::iterator moxie::Poll::getEventPos(const struct pollfd& event) {
     for (auto iter = revents_.begin(); iter != revents_.end(); ++iter) {
         if (iter->fd == event.fd) {
             return iter;
@@ -47,7 +47,7 @@ std::vector<struct pollfd>::iterator fas::Poll::getEventPos(const struct pollfd&
     return revents_.end();
 }
 
-fas::Timestamp fas::Poll::Loop(std::vector<PollerEvent_t> &events, int timeout) {
+moxie::Timestamp moxie::Poll::Loop(std::vector<PollerEvent_t> &events, int timeout) {
 should_continue:
     // FIXME : use ppoll
     int ret = ::poll(revents_.data(), revents_.size(), timeout);

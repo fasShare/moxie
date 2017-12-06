@@ -1,16 +1,14 @@
-#ifndef FAS_EVENTSPOLLER_H
-#define FAS_EVENTSPOLLER_H
+#ifndef MOXIE_EVENTSPOLLER_H
+#define MOXIE_EVENTSPOLLER_H
 #include <vector>
-
 
 #include <Timestamp.h>
 #include <Events.h>
 
-
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 
-namespace fas {
+namespace moxie {
 
 typedef struct PollerEvent {
     int fd;
@@ -31,4 +29,4 @@ public:
 };
 
 }
-#endif // FAS_EVENTSPOLLER_H
+#endif // MOXIE_EVENTSPOLLER_H

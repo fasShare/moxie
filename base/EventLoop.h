@@ -1,5 +1,5 @@
-#ifndef FAS_EVENTLOOP_H
-#define FAS_EVENTLOOP_H
+#ifndef MOXIE_EVENTLOOP_H
+#define MOXIE_EVENTLOOP_H
 #include <vector>
 #include <map>
 #include <iostream>
@@ -19,7 +19,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 class Events;
 class MutexLocker;
@@ -71,4 +71,4 @@ private:
 int CreateEventfd();
 
 }
-#endif // FAS_EVENTLOOP_H
+#endif // MOXIE_EVENTLOOP_H

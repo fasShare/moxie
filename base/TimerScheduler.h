@@ -1,17 +1,18 @@
-#ifndef FAS_TIMERSCHEDULER_H
-#define FAS_TIMERSCHEDULER_H
+#ifndef MOXIE_TIMERSCHEDULER_H
+#define MOXIE_TIMERSCHEDULER_H
 #include <sys/timerfd.h>
 
 #include <TimerHeap.h>
 #include <Timestamp.h>
 #include <Events.h>
+#include <Timer.h>
 
-namespace fas {
+namespace moxie {
 
 class TimerScheduler {
 public:
-    TimersScheduler();
-    ~TimersScheduler();
+    TimerScheduler();
+    ~TimerScheduler();
 
     TimerHeap::timerfd_t getTimerfd() const;
 	boost::shared_ptr<Events> getEvent();
@@ -32,5 +33,5 @@ private:
 };
 
 }
-#endif // TIMERSSCHEDULER_H
+#endif // TIMERSCHEDULER_H
 

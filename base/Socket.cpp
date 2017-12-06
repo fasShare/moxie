@@ -8,27 +8,27 @@
 #include <Log.h>
 #include <NetAddress.h>
 
-fas::Socket::Socket(int domain, int type, int protocol) :
+moxie::Socket::Socket(int domain, int type, int protocol) :
     socket_(::socket(domain, type, protocol)),
     state_(Socket::STATE::OPENED) {
 }
 
-fas::Socket::Socket(int sd) :
+moxie::Socket::Socket(int sd) :
     socket_(sd),
     state_(Socket::STATE::CLOSED) {
 }
 
-const int fas::Socket::operator=(int sd) {
+const int moxie::Socket::operator=(int sd) {
     socket_ = sd;
     return socket_;
 }
 
-int fas::Socket::getSocket() const {
+int moxie::Socket::getSocket() const {
     return socket_;
 }
 
 // FIXME : invoking other func
-bool fas::Socket::setNoBlocking() {
+bool moxie::Socket::setNoBlocking() {
     int flag = ::fcntl(socket_, F_GETFL);
     flag |= O_NONBLOCK;
     int ret = ::fcntl(socket_, F_SETFL, flag);
@@ -40,7 +40,7 @@ bool fas::Socket::setNoBlocking() {
 }
 
 // FIXME : invoking other func
-bool fas::Socket::setExecClose() {
+bool moxie::Socket::setExecClose() {
     int flag = ::fcntl(socket_, F_GETFD, 0);
     flag |= FD_CLOEXEC;
     int ret = ::fcntl(socket_, F_SETFD, flag);
@@ -51,7 +51,7 @@ bool fas::Socket::setExecClose() {
     return true;
 }
 
-bool fas::Socket::bind(const NetAddress& addr) {
+bool moxie::Socket::bind(const NetAddress& addr) {
     int ret = ::bind(socket_, addr.addrPtr(), addr.addrLen());
     if (ret == -1) {
         LOGGER_SYSERR("bind error : " << ::strerror(errno));
@@ -60,7 +60,7 @@ bool fas::Socket::bind(const NetAddress& addr) {
     return true;
 }
 
-bool fas::Socket::listen(int backlog) {
+bool moxie::Socket::listen(int backlog) {
     int ret = ::listen(socket_, backlog);
     if (ret == -1) {
         LOGGER_SYSERR("listen error : " << ::strerror(errno));
@@ -69,7 +69,7 @@ bool fas::Socket::listen(int backlog) {
     return true;
 }
 
-bool fas::Socket::connect(const NetAddress& addr) {
+bool moxie::Socket::connect(const NetAddress& addr) {
     int ret = ::connect(socket_, addr.addrPtr(), addr.addrLen());
     if (ret == -1) {
         if (errno == EINPROGRESS) {
@@ -81,7 +81,7 @@ bool fas::Socket::connect(const NetAddress& addr) {
     return true;
 }
 
-int fas::Socket::accept(fas::NetAddress& addr, bool noblockingexec) {
+int moxie::Socket::accept(moxie::NetAddress& addr, bool noblockingexec) {
     socklen_t len = addr.addrLen();
     int ret = ::accept(socket_, addr.addrPtr(), &len);
     if(ret == -1) {
@@ -97,13 +97,13 @@ int fas::Socket::accept(fas::NetAddress& addr, bool noblockingexec) {
     return ret;
 }
 
-fas::Socket::~Socket() {
+moxie::Socket::~Socket() {
     LOGGER_TRACE("tid : " << gettid() <<  " socket close!");
     ::close(socket_);
     state_ = Socket::STATE::CLOSED;
 }
 
-bool fas::SetNoBlockingOrExec(int sd) {
+bool moxie::SetNoBlockingOrExec(int sd) {
     int flag = ::fcntl(sd, F_GETFL);
     int nflag = flag | O_NONBLOCK;
     int ret = ::fcntl(sd, F_SETFL, nflag);

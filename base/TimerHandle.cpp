@@ -9,7 +9,7 @@
 
 #include <boost/core/ignore_unused.hpp>
 
-void fas::TimerHandle::handleRead(boost::shared_ptr<Events> revents, fas::Timestamp time) {
+void moxie::TimerHandle::handleRead(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
     LOGGER_TRACE("TimerHandle read.");
 	auto loop = EventLoopPool::GetLoop(revents->getTid());
 	if (!loop) {
@@ -24,17 +24,17 @@ void fas::TimerHandle::handleRead(boost::shared_ptr<Events> revents, fas::Timest
 	schedule->handleRead(revents, time);
 }
 
-void fas::TimerHandle::handleWrite(boost::shared_ptr<Events> revents, fas::Timestamp time) {
+void moxie::TimerHandle::handleWrite(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
     LOGGER_TRACE("TimerHandle write was invoked.");
 	boost::ignore_unused(revents, time);
 }
 
-void fas::TimerHandle::handleError(boost::shared_ptr<Events> revents, fas::Timestamp time) {
+void moxie::TimerHandle::handleError(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
     LOGGER_TRACE("TimerHandle error was invoked.");
 	boost::ignore_unused(revents, time);
 }
 
-void fas::TimerHandle::handleClose(boost::shared_ptr<Events> revents, fas::Timestamp time) {
+void moxie::TimerHandle::handleClose(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
     LOGGER_WARN("TimerHandle close was invoked.");
 	boost::ignore_unused(revents, time);
 }

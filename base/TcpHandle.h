@@ -1,5 +1,5 @@
-#ifndef FAS_TCPHANDLE_H
-#define FAS_TCPHANDLE_H
+#ifndef MOXIE_TCPHANDLE_H
+#define MOXIE_TCPHANDLE_H
 #include <Events.h>
 #include <Socket.h>
 #include <NetAddress.h>
@@ -10,7 +10,7 @@
 
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 class TcpHandle : public Handler {
 public:
@@ -33,5 +33,5 @@ private:
 };
 
 }
-#endif // FAS_TCPCONNECTION_H
+#endif // MOXIE_TCPCONNECTION_H
 

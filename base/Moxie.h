@@ -5,15 +5,10 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#define EVENT_TYPE_START        0
-#define EVENT_TYPE_TCPCON       1
-#define EVENT_TYPE_TIMER        2
-#define EVENT_TYPE_TCPSER		3
-
 namespace moxie {
 
-class fas::EventLoop;
-class fas::ThreadPool;
+class EventLoop;
+class ThreadPool;
 
 void MoxieDefaultInit() {
 }
@@ -35,10 +30,12 @@ public:
 private:
     static Moxie* Instance();
     void RegisterHandler();
+    bool init(MoxieArgsType args);
+    Moxie();
 
 	ThreadPool *threadPool_;
 	EventLoop *loop_;
-	Moxie *moxie_;
+	static Moxie *moxie_;
 	SigIgnore signor_;
 };
 

@@ -1,8 +1,8 @@
-#ifndef FAS_TIMESTAMP_H
-#define FAS_TIMESTAMP_H
+#ifndef MOXIE_TIMESTAMP_H
+#define MOXIE_TIMESTAMP_H
 #include <string>
 
-namespace fas {
+namespace moxie {
 
 using std::string;
 
@@ -32,4 +32,4 @@ double timeDifference(Timestamp high, Timestamp low);
 Timestamp addTime(Timestamp timestamp, double seconds);
 
 }
-#endif  // FAS_TIMESTAMP_H
+#endif  // MOXIE_TIMESTAMP_H

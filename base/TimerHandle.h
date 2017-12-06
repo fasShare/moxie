@@ -1,11 +1,11 @@
-#ifndef FAS_TIMERHANDLE_H
-#define FAS_TIMERHANDLE_H
+#ifndef MOXIE_TIMERHANDLE_H
+#define MOXIE_TIMERHANDLE_H
 #include <Events.h>
 #include <Handler.h>
 
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 class TimerHandle : public Handler {
 public:

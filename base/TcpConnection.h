@@ -1,5 +1,5 @@
-#ifndef FAS_TCPCONNECTION_H
-#define FAS_TCPCONNECTION_H
+#ifndef MOXIE_TCPCONNECTION_H
+#define MOXIE_TCPCONNECTION_H
 #include <Events.h>
 #include <Socket.h>
 #include <NetAddress.h>
@@ -9,7 +9,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 class buffer;
 
@@ -64,5 +64,5 @@ private:
 };
 
 }
-#endif // FAS_TCPCONNECTION_H
+#endif // MOXIE_TCPCONNECTION_H
 

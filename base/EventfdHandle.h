@@ -1,5 +1,5 @@
-#ifndef FAS_EVENTFDHANDLE_H
-#define FAS_EVENTFDHANDLE_H
+#ifndef MOXIE_EVENTFDHANDLE_H
+#define MOXIE_EVENTFDHANDLE_H
 #include <Events.h>
 #include <Socket.h>
 #include <NetAddress.h>
@@ -10,7 +10,7 @@
 
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 class EventfdHandle : public Handler {
 public:
@@ -21,5 +21,5 @@ public:
 };
 
 }
-#endif // FAS_EVENTFDHANDLE_H
+#endif // MOXIE_EVENTFDHANDLE_H
 

@@ -1,5 +1,5 @@
-#ifndef FAS_TIMEHEAP_H
-#define FAS_TIMEHEAP_H
+#ifndef MOXIE_TIMEHEAP_H
+#define MOXIE_TIMEHEAP_H
 #include <set>
 #include <utility>
 #include <vector>
@@ -8,7 +8,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace fas {
+namespace moxie {
 
 class Timer;
 /*!
@@ -61,5 +61,5 @@ private:
 };
 
 }
-#endif // FAS_TIMEHEAP_H
+#endif // MOXIE_TIMEHEAP_H
 

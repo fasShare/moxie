@@ -1,5 +1,5 @@
-#ifndef FAS_TCPSERVER_H
-#define FAS_TCPSERVER_H
+#ifndef MOXIE_TCPSERVER_H
+#define MOXIE_TCPSERVER_H
 #include <memory>
 #include <map>
 #include <vector>
@@ -8,6 +8,7 @@
 #include <Socket.h>
 #include <Events.h>
 #include <Handler.h>
+#include <EventLoop.h>
 #include <NetAddress.h>
 #include <TcpConnection.h>
 #include <Mutex.h>
@@ -16,7 +17,7 @@
 
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 class TcpServer : public Handler{
 public:
@@ -33,6 +34,7 @@ public:
 
     void setNewConnCallback(TcpConnCallback ncb);
 private:
+    EventLoop *loop_;
     Socket server_;
     boost::shared_ptr<Events> events_;
     NetAddress addr_;
@@ -41,4 +43,4 @@ private:
 };
 
 }
-#endif // FAS_TCPSERVER_H
+#endif // MOXIE_TCPSERVER_H

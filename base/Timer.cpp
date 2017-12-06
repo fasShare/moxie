@@ -1,7 +1,7 @@
 #include <Timer.h>
 #include <Log.h>
 
-fas::Timer::Timer(const fas::TimerCallback& cb, fas::Timestamp when, double interval) :
+moxie::Timer::Timer(const moxie::TimerCallback& cb, moxie::Timestamp when, double interval) :
     callback_(cb),
     expiration_(when),
     interval_(interval),
@@ -9,35 +9,35 @@ fas::Timer::Timer(const fas::TimerCallback& cb, fas::Timestamp when, double inte
     state_(Timer::STATE::ADDED) {
 }
 
-void fas::Timer::run() const {
+void moxie::Timer::run() const {
     callback_();
 }
 
-fas::Timestamp fas::Timer::getExpiration() const {
+moxie::Timestamp moxie::Timer::getExpiration() const {
     return expiration_;
 }
 
-bool fas::Timer::getRepeat() const {
+bool moxie::Timer::getRepeat() const {
     return repeat_;
 }
 
-fas::Timer::STATE fas::Timer::getState() const {
+moxie::Timer::STATE moxie::Timer::getState() const {
     return state_;
 }
 
-void fas::Timer::setState(Timer::STATE state) {
+void moxie::Timer::setState(Timer::STATE state) {
     state_ = state;
 }
 
-void fas::Timer::restart(fas::Timestamp now) {
+void moxie::Timer::restart(moxie::Timestamp now) {
     if (repeat_) {
-        expiration_ = fas::addTime(now, interval_);
+        expiration_ = moxie::addTime(now, interval_);
     }
     else {
-        expiration_ = fas::Timestamp::invalid();
+        expiration_ = moxie::Timestamp::invalid();
     }
 }
 
-fas::Timer::~Timer() {
+moxie::Timer::~Timer() {
     LOGGER_TRACE("Destroy one Timer!");
 }

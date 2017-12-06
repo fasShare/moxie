@@ -1,6 +1,6 @@
 #include <Log.h>
 
-using namespace fas;
+using namespace moxie;
 
 int main() {
     CommonLog::OpenLog("./", LOG_WARN, "warning", "error", "info", "fatal");

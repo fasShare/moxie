@@ -1,11 +1,11 @@
-#ifndef FAS_SOCKETNETADDRESS_H
-#define FAS_SOCKETNETADDRESS_H
+#ifndef MOXIE_SOCKETNETADDRESS_H
+#define MOXIE_SOCKETNETADDRESS_H
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 
 
-namespace fas {
+namespace moxie {
 
 /*!
  * \brief The NetAddress class
@@ -27,4 +27,4 @@ private:
 };
 
 }
-#endif // FAS_SOCKETNETADDRESS_H
+#endif // MOXIE_SOCKETNETADDRESS_H

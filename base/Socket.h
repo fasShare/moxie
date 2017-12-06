@@ -1,10 +1,10 @@
-#ifndef FAS_SOCKET_H
-#define FAS_SOCKET_H
+#ifndef MOXIE_SOCKET_H
+#define MOXIE_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <fcntl.h>
 
-namespace fas {
+namespace moxie {
 
 class NetAddress;
 
@@ -42,4 +42,4 @@ private:
 bool SetNoBlockingOrExec(int sd);
 
 }
-#endif // FAS_SOCKET_H
+#endif // MOXIE_SOCKET_H

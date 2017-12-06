@@ -1,9 +1,9 @@
-#ifndef FAS_ENDIAN_H
-#define FAS_ENDIAN_H
+#ifndef MOXIE_ENDIAN_H
+#define MOXIE_ENDIAN_H
 #include <stdint.h>
 #include <endian.h>
 
-namespace fas {
+namespace moxie {
 
 namespace sockets
 {
@@ -48,4 +48,4 @@ inline uint16_t networkToHost16(uint16_t net16) {
 }
 
 }
-#endif  // FAS_ENDIAN_H
+#endif  // MOXIE_ENDIAN_H
