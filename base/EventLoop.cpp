@@ -31,6 +31,7 @@ fas::EventLoop::EventLoop(PollerFactory *pollerFactory) :
     pollerFactory_(pollerFactory),
     events_(),
     mutable_(),
+	schedule_(new TimerScheduler()),
     mutex_(),
     tid_(gettid()),
     quit_(false),
@@ -40,7 +41,8 @@ fas::EventLoop::EventLoop(PollerFactory *pollerFactory) :
         LOGGER_SYSERR("New Poller error!");
     }
     count_++;
-    Eventsops::BuildEventIntoLoop(this, new Events(wakeFd_, kReadEvent), EVENT_TYPE_EVENTFD);
+    assert(poll_->EventsAdd(new Events(wakeFd_, kReadEvent)));
+	updateEvents(schedule_->getEvent());
 }
 
 int fas::CreateEventfd() {
@@ -75,6 +77,10 @@ bool fas::EventLoop::updateEvents(boost::shared_ptr<Events> event) {
     }
 
     return pollUpdate(event);
+}
+
+fas::TimerScheduler* fas::EventLoop::getTimerSchedule() {
+	return schedule_;
 }
 
 void fas::EventLoop::wakeupLoop() {

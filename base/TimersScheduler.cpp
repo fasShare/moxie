@@ -2,35 +2,37 @@
 #include <utility>
 #include <algorithm>
 
-
-#include <TimersScheduler.h>
+#include <TimerScheduler.h>
 #include <EventLoop.h>
 #include <Timestamp.h>
 #include <Log.h>
 
-
 #include <boost/bind.hpp>
 #include <boost/core/ignore_unused.hpp>
 
-fas::TimersScheduler::TimersScheduler() :
+fas::TimerScheduler::TimerScheduler() :
     timerfd_(::timerfd_create(CLOCK_MONOTONIC, 0)),
-    loop_(loop),
     timerheap_(),
     expired_(),
+	event_(new Events(timerfd_, kReadEvent)),
     timerCallbackRunning_(false) {
 
     if (timerfd_ ==  -1) {
         LOGGER_SYSERR("timerfd_create error : " << ::strerror(errno));
     }
-
+	event_->setType(EVENT_TYPE_TIMER);	
 	LOGGER_TRACE("Timer fd = " << timerfd_);
 }
 
-fas::TimerHeap::timerfd_t fas::TimersScheduler::getTimerfd() const {
+fas::TimerHeap::timerfd_t fas::TimerScheduler::getTimerfd() const {
     return timerfd_;
 }
 
-struct itimerspec fas::TimersScheduler::calculateTimerfdNewValue(fas::Timestamp earlist) {
+boost::shared_ptr<fas::Events> fas::TimerScheduler::getEvent() {
+	return event_;
+}
+
+struct itimerspec fas::TimerScheduler::calculateTimerfdNewValue(fas::Timestamp earlist) {
     int64_t microseconds =  earlist.get_microSecondsSinceEpoch() - \
                             fas::Timestamp::now().get_microSecondsSinceEpoch();
     if (microseconds < 100) {
@@ -47,7 +49,7 @@ struct itimerspec fas::TimersScheduler::calculateTimerfdNewValue(fas::Timestamp 
     return newvalue;
 }
 
-bool fas::TimersScheduler::resetTimer(fas::Timestamp earlist) {
+bool fas::TimerScheduler::resetTimer(fas::Timestamp earlist) {
     struct itimerspec newvalue;
     struct itimerspec oldvalue;
     bzero(&newvalue, sizeof(struct itimerspec));
@@ -61,7 +63,7 @@ bool fas::TimersScheduler::resetTimer(fas::Timestamp earlist) {
     return true;
 }
 // If Timer add itself in it's callback. this operator will failed.
-bool fas::TimersScheduler::addTimer(fas::Timer *timer) {
+bool fas::TimerScheduler::addTimer(fas::Timer *timer) {
     loop_->assertInOwnerThread();
     if (timerCallbackRunning_ == true) {
         auto iter = std::find(expired_.begin(), expired_.end(), \
@@ -78,7 +80,7 @@ bool fas::TimersScheduler::addTimer(fas::Timer *timer) {
     return true;
 }
 
-void fas::TimersScheduler::delTimer(fas::Timer *timer) {
+void fas::TimerScheduler::delTimer(fas::Timer *timer) {
     loop_->assertInOwnerThread();
     if (timerCallbackRunning_ == true) {
         auto iter = std::find(expired_.begin(), expired_.end(), \
@@ -95,7 +97,7 @@ void fas::TimersScheduler::delTimer(fas::Timer *timer) {
     }
 }
 
-void fas::TimersScheduler::handleRead(boost::shared_ptr<Events> events, fas::Timestamp time) {
+void fas::TimerScheduler::handleRead(boost::shared_ptr<Events> events, fas::Timestamp time) {
     loop_->assertInOwnerThread();
     boost::ignore_unused(events, time);
     // now is more accurate than the time of loop wait returned.
@@ -115,19 +117,7 @@ void fas::TimersScheduler::handleRead(boost::shared_ptr<Events> events, fas::Tim
     expired_.clear();
 }
 
-void fas::TimersScheduler::handleWrite(boost::shared_ptr<Events> event, Timestamp time) {
-    boost::ignore_unused(events, time);
-}
-
-void fas::TimersScheduler::handleError(boost::shared_ptr<Events> event, Timestamp time) {
-    boost::ignore_unused(events, time);
-}
-
-void fas::TimersScheduler::handleClose(boost::shared_ptr<Events> event, Timestamp time) {
-    boost::ignore_unused(events, time);
-}
-
-fas::TimersScheduler::~TimersScheduler() {
+fas::TimerScheduler::~TimerScheduler() {
     for (auto iter = expired_.begin(); iter != expired_.end(); ++iter) {
         if (iter->second != nullptr) {
             delete iter->second;

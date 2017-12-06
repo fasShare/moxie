@@ -17,8 +17,7 @@
 fas::TcpServer::TcpServer(const NetAddress& addr, int threadNum) :
     signor_(),
     server_(AF_INET, SOCK_STREAM, 0),
-    loop_(new EventLoop),
-    threadNum_(threadNum <= 0 ? 1: threadNum),
+    loop_(nullptr),
     events_(new Events(server_.getSocket(), kReadEvent)),
     addr_(addr),
     listenBacklog_(50) {
@@ -26,29 +25,18 @@ fas::TcpServer::TcpServer(const NetAddress& addr, int threadNum) :
     server_.setExecClose();
     server_.bind(addr_);
     server_.listen(listenBacklog_);
-    events_->setType(Events::type::TCPSERVER);
+    events_->setType(EVENT_TYPE_TCPSER);
 	LOGGER_TRACE("server listen fd = " << server_.getSocket());
-    loop_->updateEvents(events_);
-    EventLoopPool::AddEventLoop(gettid(), loop_, true);
 }
 
-fas::EventLoop* fas::TcpServer::getLoop() const{
-    return loop_;
-}
-
-void fas::TcpServer::setLoop(fas::EventLoop *loop) {
-	loop_ = loop;
-}
-
-bool fas::TcpServer::start() {  
+bool fas::TcpServer::start() { 
+	loop_ = EventLoopPool::GetMainLoop();
 	if (!loop_) {
-		LOGGER_ERROR("TcpServer's loop is nullptr.");
+		LOGGER_ERROR("Please check MoxieInit() was called!");
 		return false;
-	}
-    threadPool_ = new (std::nothrow) ThreadPool(threadNum_, TcpServer::LoopThreadFunc, "ThreadPool");
-    assert(threadPool_);
-    threadPool_->start();
-    loop_->loop();
+	}	
+    loop_->updateEvents(events_);
+	HandlePool::AddHandler(EVENT_TYPE_TCPSER, this);
     return true;
 }
 
@@ -57,7 +45,7 @@ void fas::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time)
     loop_->assertInOwnerThread();
     boost::ignore_unused(time);
 
-    fas::EventLoop *workloop = loop_;
+    fas::EventLoop *workloop = nullptr;
 
     if (event->getFd() == server_.getSocket()) {
         fas::NetAddress peerAddr;
@@ -74,7 +62,7 @@ void fas::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time)
         long looptid = workloop->getTid();
 
         boost::shared_ptr<Events> conn_event(new fas::Events(sd, kReadEvent));
-        conn_event->setType(Events::type::TCPCONN);
+        conn_event->setType(EVENT_TYPE_TCPCON);
         conn_event->setTid(looptid);
         
         fas::TcpConnection::TcpConnShreadPtr sconn(new fas::TcpConnection());
@@ -92,28 +80,18 @@ void fas::TcpServer::handleRead(boost::shared_ptr<Events> event, Timestamp time)
 }
 
 void fas::TcpServer::handleWrite(boost::shared_ptr<Events> revents, Timestamp time) {
-    LOGGER_ERROR("In handle write of TcpServer.");
+	boost::ignore_unused(events, time);
+	LOGGER_ERROR("In handle write of TcpServer.");
 }
 
 void fas::TcpServer::handleError(boost::shared_ptr<Events> revents, Timestamp time) {
-    LOGGER_ERROR("In handle error of TcpServer.");
+	boost::ignore_unused(events, time);
+	LOGGER_ERROR("In handle error of TcpServer.");
 }
 
 void fas::TcpServer::handleClose(boost::shared_ptr<Events> revents, Timestamp time) {
-    LOGGER_ERROR("In handle close of TcpServer.");
-}
-
-void fas::TcpServer::LoopThreadFunc() {
-    EventLoop *loop = new (std::nothrow) EventLoop();
-    if (nullptr == loop) {
-        return;
-    }
-
-    if (!EventLoopPool::AddEventLoop(gettid(), loop)) {
-        return;
-    }
-
-    loop->loop();
+	boost::ignore_unused(events, time);
+	LOGGER_ERROR("In handle close of TcpServer.");
 }
 
 void fas::TcpServer::setNewConnCallback(TcpConnCallback ncb) {

@@ -4,7 +4,9 @@
 
 fas::EventLoopPool* fas::EventLoopPool::instance_ = nullptr; 
 fas::EventLoopPool::EventLoopPool() :
-    loops_(),
+	mutex_(),
+    mainLoop_(nullptr),
+	loops_(),
     nextLoops_(),
     next_(0) {
 }
@@ -14,10 +16,12 @@ bool fas::EventLoopPool::addEventLoop(long tid, fas::EventLoop* loop, bool ismai
     if ((loop == NULL) || (loops_.find(tid) != loops_.end())) {
         return false;
     }
-    loops_[tid] = loop;
     if (!ismain) {
+    	loops_[tid] = loop;
         nextLoops_.push_back(loop);
-    }
+    } else {
+		mainLoop_ = loop;
+	}
     LOGGER_TRACE("Num of EventLoop in Bucket is " << nextLoops_.size());
     return true;
 }
@@ -40,6 +44,14 @@ fas::EventLoop *fas::EventLoopPool::getLoop(long tid) {
         return nullptr;
     }
     return iter->second;
+}
+
+fas::EventLoop* fas::EventLoopPool::getMainLoop() {
+	MutexLocker locker(mutex_);
+	if (mainLoop_) {
+		return mainLoop_;
+	}
+	return nullptr;
 }
 
 fas::EventLoopPool *fas::EventLoopPool::Instance() {
