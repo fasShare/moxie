@@ -21,10 +21,10 @@ moxie::TcpServer::TcpServer(const NetAddress& addr, int threadNum) :
     events_(new Events(server_.getSocket(), kReadEvent)),
     addr_(addr),
     listenBacklog_(50) {
-    server_.setNoBlocking();
-    server_.setExecClose();
-    server_.bind(addr_);
-    server_.listen(listenBacklog_);
+    assert(server_.setNoBlocking());
+    assert(server_.setExecClose());
+    assert(server_.bind(addr_));
+    assert(server_.listen(listenBacklog_));
     events_->setType(EVENT_TYPE_TCPSER);
 	LOGGER_TRACE("server listen fd = " << server_.getSocket());
 }

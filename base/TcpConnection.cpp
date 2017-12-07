@@ -115,6 +115,26 @@ bool moxie::TcpConnection::updateEvent() {
     return true;
 }
 
+void moxie::TcpConnection::setWriteDone(WriteDone writeDone) {
+	writeDone_ = writeDone;
+}
+void moxie::TcpConnection::setHasData(HasData hasData) {
+	hasData_ = hasData;
+}
+void moxie::TcpConnection::setWillBeClose(WillBeClose beClose) {
+	beClose_ = beClose;
+}
+
+moxie::TcpConnection::WriteDone moxie::TcpConnection::getWriteDone() {
+	return writeDone_;
+}
+moxie::TcpConnection::HasData moxie::TcpConnection::getHasData() {
+	return hasData_;
+}
+moxie::TcpConnection::WillBeClose moxie::TcpConnection::getWillBeClose() {
+	return beClose_;
+}
+
 boost::shared_ptr<moxie::Buffer> moxie::TcpConnection::getWriteBuffer() {
     return writeBuffer_;
 }

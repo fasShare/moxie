@@ -14,6 +14,7 @@ class Eventsops {
 public:
     static bool BuildEventIntoLoop(EventLoop *loop, Events* event, int type) {
         if (!loop) {
+			assert(false);
             return false;
         }
         event->setType(type);
@@ -24,6 +25,7 @@ public:
     static bool RemoveEventFromLoop(boost::shared_ptr<Events> event) {
         auto loop = EventLoopPool::GetLoop(event->getTid());
         if (!loop) {
+			assert(false);
             return false;
         }
         event->setState(Events::state::DEL);

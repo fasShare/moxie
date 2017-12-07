@@ -41,7 +41,8 @@ moxie::EventLoop *moxie::EventLoopPool::getLoop(long tid) {
     MutexLocker locker(mutex_);
     auto iter = loops_.find(tid);
     if (iter == loops_.end()) {
-        return nullptr;
+		assert(loops_.size() == 0);
+        return mainLoop_;
     }
     return iter->second;
 }

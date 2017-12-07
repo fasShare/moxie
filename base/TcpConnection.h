@@ -17,8 +17,10 @@ class TcpConnection {
 public:
 using TcpConnShreadPtr = boost::shared_ptr<TcpConnection>;
 using TcpConnectionPtr = TcpConnection*;
-using TcpConnMessageCallback = boost::function<void (TcpConnShreadPtr,
-                                boost::shared_ptr<Buffer>, Timestamp)>;
+using WriteDone = boost::function<void (TcpConnShreadPtr, Timestamp)>;
+using HasData = boost::function<void (TcpConnShreadPtr, Timestamp)>;
+using WillBeClose = boost::function<void (TcpConnShreadPtr, Timestamp)>;
+
 using CloseCallback = boost::function<void ()>;
     TcpConnection();
     ~TcpConnection();
@@ -47,6 +49,13 @@ using CloseCallback = boost::function<void ()>;
     bool enableRead();
     bool disableRead();
 
+	void setWriteDone(WriteDone writeDone);
+	void setHasData(HasData hasData);
+	void setWillBeClose(WillBeClose beClose);
+	WriteDone getWriteDone();
+	HasData getHasData();
+	WillBeClose getWillBeClose();
+
     boost::shared_ptr<Buffer> getReadBuffer();
     boost::shared_ptr<Buffer> getWriteBuffer();
 private:
@@ -61,6 +70,10 @@ private:
     Timestamp acceptTime_;
     bool dataEmpty_;
     long tid_;
+
+	WriteDone writeDone_;
+	HasData hasData_;
+	WillBeClose beClose_;
 };
 
 }

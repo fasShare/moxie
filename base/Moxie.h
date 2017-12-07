@@ -10,16 +10,12 @@ namespace moxie {
 class EventLoop;
 class ThreadPool;
 
-void MoxieDefaultInit() {
-}
-
 typedef struct moxie_args_t{
 	int ThreadNum;
 	boost::function<void ()> InitFunc;
 
 	moxie_args_t () {
 		ThreadNum = 1;
-		InitFunc = MoxieDefaultInit;
 	}
 } MoxieArgsType;	
 

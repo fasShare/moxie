@@ -57,7 +57,9 @@ public:
         google::ShutdownGoogleLogging();
     }
 private:
-    CommonLog() = default;
+    CommonLog() {
+		google::InitGoogleLogging("");
+	}
     bool openLog(std::string logdir, int level, std::string warn, std::string error, std::string info, std::string fatal); 
 
     static CommonLog *Instance();

@@ -32,9 +32,14 @@ void moxie::TcpHandle::handleRead(boost::shared_ptr<Events> revents, moxie::Time
         handleClose(revents, time);
     } else if (ret < 0) {
         LOGGER_DEBUG("readBuffer_.readFd return -1 : " << ::strerror(err));
-    } else if (read_cb_) {
+    } else {
+		auto hasdata = conn->getHasData();
         //transfer data to back.
-        read_cb_(conn, time);
+		if (hasdata) {
+        	hasdata(conn, time);
+		} else {
+			LOGGER_WARN("The HasData callback was not seted.");
+		}
     } 
 }
 
@@ -76,14 +81,15 @@ reWrite:
             loop->updateEvents(revents);
         }
     }
-    //write data out.
-    if (write_cb_) {
-        write_cb_(conn, time);
+    //notify data write out.
+	auto writedone = conn->getWriteDone();
+    if (writedone) {
+        writedone(conn, time);
     }
 }
 
 void moxie::TcpHandle::handleError(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
-    LOGGER_TRACE("In TcpHandle error.");
+    LOGGER_TRACE("TcpHandle error start");
     auto conn = TcpConnPool::GetTcpConn(revents->getTid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
         assert(false);
@@ -91,13 +97,15 @@ void moxie::TcpHandle::handleError(boost::shared_ptr<Events> revents, moxie::Tim
     
     Eventsops::RemoveEventFromLoop(revents);
     TcpConnPool::RemoveTcpConn(conn);
-    if (error_cb_) {
-        error_cb_(conn, time);
+	auto willbeclose = conn->getWillBeClose();
+    if (willbeclose) {
+        willbeclose(conn, time);
     }
+	LOGGER_TRACE("TcpHandle error end");
 }
 
 void moxie::TcpHandle::handleClose(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
-    LOGGER_TRACE("In TcpHandle close.");
+    LOGGER_TRACE("TcpHandle close start");
     auto conn = TcpConnPool::GetTcpConn(revents->getTid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
         assert(false);
@@ -105,8 +113,9 @@ void moxie::TcpHandle::handleClose(boost::shared_ptr<Events> revents, moxie::Tim
     
     Eventsops::RemoveEventFromLoop(revents);
     TcpConnPool::RemoveTcpConn(conn);
-    if (close_cb_) {
-        close_cb_(conn, time);
+	auto willbeclose = conn->getWillBeClose();
+    if (willbeclose) {
+        willbeclose(conn, time);
     }
     LOGGER_TRACE("TcpHandle close end.");
 }

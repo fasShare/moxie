@@ -15,8 +15,6 @@ moxie::CommonLog* moxie::CommonLog::Instance() {
 }
 
 bool moxie::CommonLog::openLog(std::string logdir, int level, std::string warn, std::string error, std::string info, std::string fatal) {
-    google::InitGoogleLogging("");
-
     logdir_ == "" ? "./" : logdir_;
     if (::access(logdir.c_str(), F_OK|W_OK|R_OK)) {
         std::cerr << "fas has no permission of log dir "<< logdir  << std::endl;
