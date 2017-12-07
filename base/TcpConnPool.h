@@ -1,5 +1,5 @@
-#ifndef FAS_TCPCONNPOOL_H
-#define FAS_TCPCONNPOOL_H
+#ifndef MOXIE_TCPCONNPOOL_H
+#define MOXIE_TCPCONNPOOL_H
 #include <map>
 #include <sys/types.h>
 
@@ -8,7 +8,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace fas {
+namespace moxie {
     
 class TcpConnPool {
 using TcpConnectionPtr = TcpConnection::TcpConnectionPtr;
@@ -39,4 +39,4 @@ private:
 
 }
 
-#endif //FAS_TCPCONNPOOL_H
+#endif //MOXIE_TCPCONNPOOL_H

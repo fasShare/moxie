@@ -1,5 +1,5 @@
-#ifndef FAS_BUFFER_H
-#define FAS_BUFFER_H
+#ifndef MOXIE_BUFFER_H
+#define MOXIE_BUFFER_H
 #include <algorithm>
 #include <vector>
 #include <assert.h>
@@ -12,7 +12,7 @@
 
 using std::string;
 
-namespace fas {
+namespace moxie {
 
 
 /*!
@@ -212,6 +212,6 @@ private:
 };
 
 }
-#endif  // FAS_BUFFER_H
+#endif  // MOXIE_BUFFER_H
 
 

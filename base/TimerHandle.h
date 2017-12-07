@@ -1,18 +1,13 @@
-#ifndef MOXIE_EVENTFDHANDLE_H
-#define MOXIE_EVENTFDHANDLE_H
+#ifndef MOXIE_TIMERHANDLE_H
+#define MOXIE_TIMERHANDLE_H
 #include <Events.h>
-#include <Socket.h>
-#include <NetAddress.h>
-#include <Timestamp.h>
-#include <Buffer.h>
 #include <Handler.h>
-#include <TcpConnection.h>
 
 #include <boost/function.hpp>
 
 namespace moxie {
 
-class EventfdHandle : public Handler {
+class TimerHandle : public Handler {
 public:
     void handleRead(boost::shared_ptr<Events> revents, Timestamp time);
     void handleWrite(boost::shared_ptr<Events> revents, Timestamp time);
@@ -21,5 +16,5 @@ public:
 };
 
 }
-#endif // MOXIE_EVENTFDHANDLE_H
+#endif
 

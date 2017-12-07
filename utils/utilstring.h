@@ -1,9 +1,9 @@
-#ifndef FAS_UTILSTRING_H
-#define FAS_UTILSTRING_H
+#ifndef moxie_UTILSTRING_H
+#define moxie_UTILSTRING_H
 #include <vector>
 #include <string>
 
-namespace fas {
+namespace moxie {
 
 namespace utils {
 
@@ -19,4 +19,4 @@ std::string StringGetSuffix(const std::string& src);
 
 }
 
-#endif //FAS_UTILSTRING_H
+#endif //MOXIE_UTILSTRING_H

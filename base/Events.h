@@ -1,5 +1,5 @@
-#ifndef FAS_EVENTS_H
-#define FAS_EVENTS_H
+#ifndef MOXIE_EVENTS_H
+#define MOXIE_EVENTS_H
 #include <iostream>
 #include <sys/epoll.h>
 #include <sys/poll.h>
@@ -8,7 +8,12 @@
 
 #include <boost/static_assert.hpp>
 
-namespace fas {
+namespace moxie {
+
+#define EVENT_TYPE_START        0
+#define EVENT_TYPE_TCPCON       1
+#define EVENT_TYPE_TIMER        2
+#define EVENT_TYPE_TCPSER       3
 
 BOOST_STATIC_ASSERT_MSG(EPOLLIN == POLLIN, "EPOLLIN != POLLIN");
 BOOST_STATIC_ASSERT_MSG(EPOLLOUT == POLLOUT, "EPOLLOUT != POLLOUT");
@@ -28,14 +33,6 @@ public:
         USED,
         DEL,
         INVAILD,
-    };
-    enum type {
-        TCPCONN,
-        TCPSERVER,
-        TIMER,
-        SIGNAL,
-        EVENTFD,
-        TYPEINVAILD,
     };
 
     Events(const int fd = -1, uint32_t events = kNoneEvent);
@@ -60,8 +57,8 @@ public:
     bool originRead();
     bool originWrite();
 
-    void setType(type tp);
-    type getType() const;
+    void setType(int tp);
+    int getType() const;
 
     int getFd() const;
     void setFd(int fd);
@@ -94,7 +91,7 @@ private:
     int fd_;
     long tid_;
     state state_;
-    type type_;
+    int type_;
     uint32_t eorigin_;
     uint32_t mutable_;
 };
@@ -102,4 +99,4 @@ private:
 std::ostream& operator<<(std::ostream& os, Events& events);
 
 }
-#endif // FAS_EVENTS_H
+#endif // MOXIE_EVENTS_H

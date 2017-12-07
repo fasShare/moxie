@@ -1,21 +1,21 @@
 #include "Mutex.h"
 
-fas::Mutex::Mutex() {
+moxie::Mutex::Mutex() {
     mutex_ = PTHREAD_MUTEX_INITIALIZER;
 }
-fas::Mutex::~Mutex(){
+moxie::Mutex::~Mutex(){
     ::pthread_mutex_destroy(&mutex_);
 }
 
-void fas::Mutex::lock(){
+void moxie::Mutex::lock(){
     ::pthread_mutex_lock(&mutex_);
 }
 
-void fas::Mutex::unlock(){
+void moxie::Mutex::unlock(){
     ::pthread_mutex_unlock(&mutex_);
 }
 
-pthread_mutex_t* fas::Mutex::getMutex() {
+pthread_mutex_t* moxie::Mutex::getMutex() {
     return &mutex_;
 }
 

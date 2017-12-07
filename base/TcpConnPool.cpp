@@ -7,20 +7,20 @@
 
 #include <boost/bind.hpp>
 
-fas::TcpConnPool *fas::TcpConnPool::instance_ = nullptr;
+moxie::TcpConnPool *moxie::TcpConnPool::instance_ = nullptr;
 
-fas::TcpConnPool::TcpConnPool() :
+moxie::TcpConnPool::TcpConnPool() :
     mutex_() {
 }
 
-fas::TcpConnPool *fas::TcpConnPool::Instance() {
+moxie::TcpConnPool *moxie::TcpConnPool::Instance() {
     if (nullptr == instance_) {
         instance_ = new (std::nothrow) TcpConnPool();
     }
     return instance_;
 }
 
-bool fas::TcpConnPool::addTcpConn(long tid, int key, boost::shared_ptr<TcpConnection>& conn) {
+bool moxie::TcpConnPool::addTcpConn(long tid, int key, boost::shared_ptr<TcpConnection>& conn) {
     MutexLocker locker(mutex_);
     if (conns_.end() == conns_.find(tid)) {
         conns_[tid] = std::map<int, boost::shared_ptr<TcpConnection>>(); 
@@ -32,7 +32,7 @@ bool fas::TcpConnPool::addTcpConn(long tid, int key, boost::shared_ptr<TcpConnec
     return true;
 }
 
-boost::shared_ptr<fas::TcpConnection> fas::TcpConnPool::getTcpConn(long tid, int fd) {
+boost::shared_ptr<moxie::TcpConnection> moxie::TcpConnPool::getTcpConn(long tid, int fd) {
     MutexLocker locker(mutex_);
     auto pair = conns_.find(tid);
     if (conns_.end() != pair) {
@@ -45,7 +45,7 @@ boost::shared_ptr<fas::TcpConnection> fas::TcpConnPool::getTcpConn(long tid, int
     return nullptr;
 }
 
-void fas::TcpConnPool::removeTcpConn(long tid, int key) {
+void moxie::TcpConnPool::removeTcpConn(long tid, int key) {
     MutexLocker locker(mutex_);
 	auto iter = conns_.find(tid);
     assert(conns_.end() != iter);

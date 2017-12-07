@@ -1,8 +1,8 @@
-#ifndef FAS_MUTEX_H
-#define FAS_MUTEX_H
+#ifndef MOXIE_MUTEX_H
+#define MOXIE_MUTEX_H
 #include <pthread.h>
 
-namespace fas {
+namespace moxie {
 
 /*!
  * \brief The Mutex class
@@ -20,4 +20,4 @@ public:
 };
 
 }
-#endif // FAS_MUTEX_H
+#endif // MOXIE_MUTEX_H

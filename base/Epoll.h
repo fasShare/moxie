@@ -1,5 +1,5 @@
-#ifndef FAS_EPOLL_H
-#define FAS_EPOLL_H
+#ifndef MOXIE_EPOLL_H
+#define MOXIE_EPOLL_H
 #include <sys/epoll.h>
 #include <vector>
 
@@ -9,7 +9,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace fas {
+namespace moxie {
 
 class Poller;
 class Events;
@@ -41,4 +41,4 @@ private:
 };
 
 }
-#endif // FAS_EPOLL_H
+#endif // MOXIE_EPOLL_H

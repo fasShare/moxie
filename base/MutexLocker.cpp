@@ -1,10 +1,10 @@
 #include <MutexLocker.h>
 #include <Mutex.h>
 
-fas::MutexLocker::MutexLocker(fas::Mutex& mutex):mutex_(mutex){
+moxie::MutexLocker::MutexLocker(moxie::Mutex& mutex):mutex_(mutex){
     mutex_.lock();
 }
 
-fas::MutexLocker::~MutexLocker(){
+moxie::MutexLocker::~MutexLocker(){
     mutex_.unlock();
 }

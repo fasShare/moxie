@@ -14,11 +14,21 @@
 #include <boost/bind.hpp>
 #include <boost/core/ignore_unused.hpp>
 
-fas::TcpConnection::TcpConnection() {
+moxie::TcpConnection::TcpConnection() {
 }
 
-bool fas::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddress& peerAddr, Timestamp now) {
-    event_ = event;
+bool moxie::TcpConnection::reset() {
+	event_.reset();
+	readBuffer_->retrieveAll();
+	writeBuffer_->retrieveAll();
+	shouldClose_ = false;
+	tid_ = -1;
+	dataEmpty_ = true;
+}
+
+bool moxie::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddress& peerAddr, Timestamp now) {
+    event_.reset();
+	event_ = event;
     if (nullptr == readBuffer_) {
         readBuffer_ = boost::shared_ptr<Buffer>(new (std::nothrow) Buffer(1024));
     } else {
@@ -29,7 +39,6 @@ bool fas::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddress
     } else {
         writeBuffer_->retrieveAll();
     }
-    connfd_ = event_->getFd();
     peerAddr_ = peerAddr;
     shouldClose_ = false;
     acceptTime_ = now;
@@ -38,37 +47,37 @@ bool fas::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddress
     return true;
 }
 
-int fas::TcpConnection::getConnfd() const {
-    return connfd_;
+int moxie::TcpConnection::getConnfd() const {
+    return event_->getFd();
 }
 
-void fas::TcpConnection::setPeerAddr(const fas::NetAddress& addr) {
+void moxie::TcpConnection::setPeerAddr(const moxie::NetAddress& addr) {
     peerAddr_ = addr;
 }
 
-void fas::TcpConnection::sendString(const std::string& msg) {
+void moxie::TcpConnection::sendString(const std::string& msg) {
     putDataToWriteBuffer(msg.c_str(), msg.size());
 }
 
-void fas::TcpConnection::sendData(const void *data, size_t len) {
+void moxie::TcpConnection::sendData(const void *data, size_t len) {
     putDataToWriteBuffer(data, len);
 }
 
-void fas::TcpConnection::putDataToWriteBuffer(const void *data, size_t len) {
+void moxie::TcpConnection::putDataToWriteBuffer(const void *data, size_t len) {
     setDataEmpty(false);
     writeBuffer_->append(data, len);
     enableWrite();
 }
 
-bool fas::TcpConnection::shouldClose() {
+bool moxie::TcpConnection::shouldClose() {
     return shouldClose_;
 }
 
-void fas::TcpConnection::setShouldClose(bool down) {
+void moxie::TcpConnection::setShouldClose(bool down) {
     shouldClose_ = down;
 }
 
-bool fas::TcpConnection::shutdown(boost::shared_ptr<TcpConnection> conn) {
+bool moxie::TcpConnection::shutdown(boost::shared_ptr<TcpConnection> conn) {
     if (!conn->dataEmpty()) {
         conn->setShouldClose(true);
         return true;
@@ -78,35 +87,35 @@ bool fas::TcpConnection::shutdown(boost::shared_ptr<TcpConnection> conn) {
     return true;
 }
 
-void fas::TcpConnection::setDataEmpty(bool empty) {
+void moxie::TcpConnection::setDataEmpty(bool empty) {
     dataEmpty_ = empty;
 }
 
-bool fas::TcpConnection::dataEmpty() {
+bool moxie::TcpConnection::dataEmpty() {
     return dataEmpty_;
 }
 
-bool fas::TcpConnection::enableWrite() {
+bool moxie::TcpConnection::enableWrite() {
     event_->addEvent(kWriteEvent);
     return updateEvent();
 }
 
-bool fas::TcpConnection::disableWrite() {
+bool moxie::TcpConnection::disableWrite() {
     event_->deleteEvent(kWriteEvent);
     return updateEvent();
 }
 
-bool fas::TcpConnection::enableRead() {
+bool moxie::TcpConnection::enableRead() {
     event_->addEvent(kReadEvent);
     return updateEvent();
 }
 
-bool fas::TcpConnection::disableRead() {
+bool moxie::TcpConnection::disableRead() {
     event_->deleteEvent(kReadEvent);
     return updateEvent();
 }
 
-bool fas::TcpConnection::updateEvent() {
+bool moxie::TcpConnection::updateEvent() {
     auto loop = EventLoopPool::GetLoop(getTid());
     if (!loop) {
         assert(false);
@@ -115,14 +124,34 @@ bool fas::TcpConnection::updateEvent() {
     return true;
 }
 
-boost::shared_ptr<fas::Buffer> fas::TcpConnection::getWriteBuffer() {
+void moxie::TcpConnection::setWriteDone(WriteDone writeDone) {
+	writeDone_ = writeDone;
+}
+void moxie::TcpConnection::setHasData(HasData hasData) {
+	hasData_ = hasData;
+}
+void moxie::TcpConnection::setWillBeClose(WillBeClose beClose) {
+	beClose_ = beClose;
+}
+
+moxie::TcpConnection::WriteDone moxie::TcpConnection::getWriteDone() {
+	return writeDone_;
+}
+moxie::TcpConnection::HasData moxie::TcpConnection::getHasData() {
+	return hasData_;
+}
+moxie::TcpConnection::WillBeClose moxie::TcpConnection::getWillBeClose() {
+	return beClose_;
+}
+
+boost::shared_ptr<moxie::Buffer> moxie::TcpConnection::getWriteBuffer() {
     return writeBuffer_;
 }
 
-boost::shared_ptr<fas::Buffer> fas::TcpConnection::getReadBuffer() {
+boost::shared_ptr<moxie::Buffer> moxie::TcpConnection::getReadBuffer() {
     return readBuffer_;
 }
 
-fas::TcpConnection::~TcpConnection() {
+moxie::TcpConnection::~TcpConnection() {
     LOGGER_TRACE("tid: " << gettid() << " TcpConnection destroy!");
 }

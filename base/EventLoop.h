@@ -1,5 +1,5 @@
-#ifndef FAS_EVENTLOOP_H
-#define FAS_EVENTLOOP_H
+#ifndef MOXIE_EVENTLOOP_H
+#define MOXIE_EVENTLOOP_H
 #include <vector>
 #include <map>
 #include <iostream>
@@ -8,6 +8,7 @@
 
 #include <PollerFactory.h>
 #include <EpollFactory.h>
+#include <TimerScheduler.h>
 #include <Mutex.h>
 #include <Timestamp.h>
 #include <Condition.h>
@@ -18,7 +19,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
-namespace fas {
+namespace moxie {
 
 class Events;
 class MutexLocker;
@@ -35,17 +36,17 @@ public:
     bool updateEvents(boost::shared_ptr<Events> event);
 
     int getEventLoopNum() const;
-
     bool isInLoopOwnerThread();
     void assertInOwnerThread();  
+
+	TimerScheduler* getTimerSchedule();
 
     void quit();
     bool loop();
 
     void wakeupLoop();
-
-    bool eventHandleAble(boost::shared_ptr<Events> origin);
 private:
+    bool eventHandleAble(boost::shared_ptr<Events> origin);
     bool pollUpdate(boost::shared_ptr<Events> event);
 
     static const int kInitMaxEvents_ = 10;
@@ -58,15 +59,16 @@ private:
     std::map<int, boost::shared_ptr<Events>> events_;
     std::vector<boost::shared_ptr<Events>> mutable_;
     
+	TimerScheduler* schedule_;
+
     Mutex mutex_;
     long tid_;
 
     bool quit_;
-
     int wakeFd_;
 };
 
 int CreateEventfd();
 
 }
-#endif // FAS_EVENTLOOP_H
+#endif // MOXIE_EVENTLOOP_H

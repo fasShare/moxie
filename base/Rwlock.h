@@ -1,8 +1,8 @@
-#ifndef FAS_RWLOCK_H
-#define FAS_RWLOCK_H
+#ifndef MOXIE_RWLOCK_H
+#define MOXIE_RWLOCK_H
 #include <pthread.h>
 
-namespace fas {
+namespace moxie {
 
 class Rwlock {
 private:
@@ -18,4 +18,4 @@ public:
 };
 
 }
-#endif // FAS_RWLOCK_H
+#endif // MOXIE_RWLOCK_H

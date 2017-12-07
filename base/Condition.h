@@ -1,11 +1,11 @@
-#ifndef FAS_CONDITION_H
-#define FAS_CONDITION_H
+#ifndef MOXIE_CONDITION_H
+#define MOXIE_CONDITION_H
 #include <pthread.h>
 
 
 #include <boost/noncopyable.hpp>
 
-namespace fas {
+namespace moxie {
 
 class Mutex;
 /*!
@@ -30,4 +30,4 @@ private:
 };
 
 }
-#endif  // FAS_CONDITION_H
+#endif  // MOXIE_CONDITION_H

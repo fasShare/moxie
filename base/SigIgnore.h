@@ -1,7 +1,7 @@
 #ifndef FAS_SIGIGNORE
 #define FAS_SIGIGNORE
 
-namespace fas {
+namespace moxie {
 /*!
  * \brief The SigIgnore class
  * We can define a global SigIgnore variable to ignore the signal.

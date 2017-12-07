@@ -4,15 +4,15 @@
 #include <Handler.h>
 #include <Events.h>
 
-fas::HandlePool* fas::HandlePool::pool_ = nullptr;
-fas::HandlePool* fas::HandlePool::Instance() {
+moxie::HandlePool* moxie::HandlePool::pool_ = nullptr;
+moxie::HandlePool* moxie::HandlePool::Instance() {
     if (pool_ == nullptr) {
         pool_ = new HandlePool();
     }
     return pool_;
 }
 
-fas::Handler *fas::HandlePool::getHandler(Events::type type) {
+moxie::Handler *moxie::HandlePool::getHandler(int type) {
     auto iter = handlers_.find(type);
     if (iter != handlers_.end()) {
         return iter->second;
@@ -20,7 +20,7 @@ fas::Handler *fas::HandlePool::getHandler(Events::type type) {
     return nullptr;
 }
 
-bool fas::HandlePool::addHandler(Events::type type, Handler *handler) {
+bool moxie::HandlePool::addHandler(int type, Handler *handler) {
     if (handler == nullptr) {
         return false;
     }

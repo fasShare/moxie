@@ -1,8 +1,8 @@
-#ifndef FAS_PIPEFD_H
-#define FAS_PIPEFD_H
+#ifndef MOXIE_PIPEFD_H
+#define MOXIE_PIPEFD_H
 #include <unistd.h>
 
-namespace fas {
+namespace moxie {
 
 struct PipeFd {
     int End[2];

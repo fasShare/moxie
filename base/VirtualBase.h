@@ -1,5 +1,7 @@
-#ifndef FAS_VIRTUALBASE_H
-#define FAS_VIRTUALBASE_H
+#ifndef MOXIE_VIRTUALBASE_H
+#define MOXIE_VIRTUALBASE_H
+
+namespace moxie {
 
 class VirtualBase {
 protected:
@@ -7,4 +9,6 @@ protected:
     }
 };
 
-#endif //FAS_VIRTUALBASE_H
+}
+
+#endif //MOXIE_VIRTUALBASE_H

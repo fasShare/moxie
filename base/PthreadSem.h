@@ -1,11 +1,11 @@
-#ifndef FAS_PTHREADSEM_H
-#define FAS_PTHREADSEM_H
+#ifndef MOXIE_PTHREADSEM_H
+#define MOXIE_PTHREADSEM_H
 #include <fcntl.h>
 #include <string>
 #include <sys/stat.h>
 #include <semaphore.h>
 
-namespace fas {
+namespace moxie {
 
 class PthreadSem {
 public:
@@ -31,4 +31,4 @@ private:
 
 }
 
-#endif //FAS_POSIXSEM_H
+#endif //MOXIE_POSIXSEM_H

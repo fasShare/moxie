@@ -1,8 +1,8 @@
 #include <SigIgnore.h>
 #include <signal.h>
 
-fas::SigIgnore::SigIgnore() {
+moxie::SigIgnore::SigIgnore() {
     ::signal(SIGPIPE, SIG_IGN);
 }
 
-fas::SigIgnore SigIgn;
+moxie::SigIgnore SigIgn;

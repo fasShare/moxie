@@ -5,24 +5,34 @@
 #include <Events.h>
 #include <Timestamp.h>
 #include <TcpConnection.h>
-
+#include <Moxie.h>
 #include <boost/shared_ptr.hpp>
 
-using namespace fas;
+using namespace moxie;
 
-void read_cb(boost::shared_ptr<TcpConnection> conn, Timestamp time) {
+void HasData(boost::shared_ptr<TcpConnection> conn, Timestamp time) {
     conn->sendString(conn->getReadBuffer()->retrieveAllAsString());
-    TcpConnection::shutdown(conn);
+    //TcpConnection::shutdown(conn);
+}
+
+void NewConnection(boost::shared_ptr<TcpConnection> conn, Timestamp time) {
+	(void)time;
+	conn->setHasData(HasData);
 }
 
 int main() {
-    TcpServer *ser = new TcpServer(NetAddress(AF_INET, 6686, "127.0.0.1"), 10);
-    auto tcphandle = new TcpHandle();
-    tcphandle->setReadCallback(read_cb);
+	CommonLog::MinLogLevelOutput(LOG_WARN);
+	FLAGS_logbufsecs = 0;
 
-    Eventsops::RegisterEventHandler(Events::type::TCPCONN, new TcpHandle());
-    Eventsops::RegisterEventHandler(Events::type::TCPSERVER, ser);
+	MoxieArgsType args;
+	args.ThreadNum = 0;
+
+	Moxie::MoxieInit(args);
     
+	TcpServer *ser = new TcpServer(NetAddress(AF_INET, 6686, "127.0.0.1"), 10);
+	ser->setNewConnCallback(NewConnection);
     ser->start();
+
+	Moxie::Run();
     return 0;
 }

@@ -19,18 +19,19 @@
 #include <boost/bind.hpp>
 #include <boost/core/ignore_unused.hpp>
 
-std::atomic<int> fas::EventLoop::count_(0);
+std::atomic<int> moxie::EventLoop::count_(0);
 
-fas::EventLoop::EventLoop() :
+moxie::EventLoop::EventLoop() :
     EventLoop(new (std::nothrow) EpollFactory) {
 }
 
-fas::EventLoop::EventLoop(PollerFactory *pollerFactory) :
+moxie::EventLoop::EventLoop(PollerFactory *pollerFactory) :
     poll_(nullptr),
     pollDelayTime_(200),
     pollerFactory_(pollerFactory),
     events_(),
     mutable_(),
+	schedule_(new TimerScheduler()),
     mutex_(),
     tid_(gettid()),
     quit_(false),
@@ -40,11 +41,11 @@ fas::EventLoop::EventLoop(PollerFactory *pollerFactory) :
         LOGGER_SYSERR("New Poller error!");
     }
     count_++;
-    Eventsops::RegisterEventHandler(Events::type::EVENTFD, new EventfdHandle());
-    Eventsops::BuildEventIntoLoop(this, new Events(wakeFd_, kReadEvent), Events::type::EVENTFD);
+    assert(poll_->EventsAdd(new Events(wakeFd_, kReadEvent)));
+	updateEvents(schedule_->getEvent());
 }
 
-int fas::CreateEventfd() {
+int moxie::CreateEventfd() {
     int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if (evtfd < 0) {
         LOGGER_SYSERR("Failed in eventfd!");
@@ -53,15 +54,15 @@ int fas::CreateEventfd() {
     return evtfd;
 }
 
-long fas::EventLoop::getTid() const{
+long moxie::EventLoop::getTid() const{
     return tid_;
 }
 
-int fas::EventLoop::getEventLoopNum() const {
+int moxie::EventLoop::getEventLoopNum() const {
     return count_;
 }
 
-bool fas::EventLoop::updateEvents(boost::shared_ptr<Events> event) {
+bool moxie::EventLoop::updateEvents(boost::shared_ptr<Events> event) {
     MutexLocker lock(mutex_);
     LOGGER_TRACE("updateEvents start");
     if (event->invaild()) {
@@ -78,7 +79,11 @@ bool fas::EventLoop::updateEvents(boost::shared_ptr<Events> event) {
     return pollUpdate(event);
 }
 
-void fas::EventLoop::wakeupLoop() {
+moxie::TimerScheduler* moxie::EventLoop::getTimerSchedule() {
+	return schedule_;
+}
+
+void moxie::EventLoop::wakeupLoop() {
     uint64_t one = 1;
     ssize_t n = ::write(wakeFd_, &one, sizeof one);
     if (n != sizeof one) {
@@ -86,7 +91,7 @@ void fas::EventLoop::wakeupLoop() {
     }
 }
 
-bool fas::EventLoop::pollUpdate(boost::shared_ptr<fas::Events> event) {
+bool moxie::EventLoop::pollUpdate(boost::shared_ptr<moxie::Events> event) {
     LOGGER_TRACE("pollUpdate start");
     if (event->invaild()) {
         return false;
@@ -110,15 +115,15 @@ bool fas::EventLoop::pollUpdate(boost::shared_ptr<fas::Events> event) {
     return true;
 }
 
-void fas::EventLoop::resetOwnerTid() {
+void moxie::EventLoop::resetOwnerTid() {
 	tid_ = gettid();
 }
 
-void fas::EventLoop::assertInOwnerThread() {
+void moxie::EventLoop::assertInOwnerThread() {
     assert(gettid() == tid_);
 }
 
-void fas::EventLoop::quit() {
+void moxie::EventLoop::quit() {
     MutexLocker lock(mutex_);
     quit_ = true;
     if(!(tid_ == gettid())) {
@@ -127,7 +132,7 @@ void fas::EventLoop::quit() {
     boost::ignore_unused(lock);
 }
 
-bool fas::EventLoop::eventHandleAble(boost::shared_ptr<Events> origin) {
+bool moxie::EventLoop::eventHandleAble(boost::shared_ptr<Events> origin) {
     if (origin->isdel()) {
         return false;
     }
@@ -143,7 +148,7 @@ bool fas::EventLoop::eventHandleAble(boost::shared_ptr<Events> origin) {
     return true;
 }
 
-bool fas::EventLoop::loop() {
+bool moxie::EventLoop::loop() {
     LOGGER_TRACE("A EventLoop started.");
     assertInOwnerThread();
     Timestamp looptime;
@@ -179,7 +184,7 @@ bool fas::EventLoop::loop() {
     return true;
 }
 
-fas::EventLoop::~EventLoop() {
+moxie::EventLoop::~EventLoop() {
     delete pollerFactory_;
     LOGGER_TRACE("EventLoop will be destroyed in Thread:" << gettid());
 }

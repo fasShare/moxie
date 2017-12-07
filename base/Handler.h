@@ -1,11 +1,11 @@
-#ifndef FAS_HANDLER_H
-#define FAS_HANDLER_H
+#ifndef MOXIE_HANDLER_H
+#define MOXIE_HANDLER_H
 #include <Events.h>
 #include <Timestamp.h>
 
 #include <boost/shared_ptr.hpp>
 
-namespace fas {
+namespace moxie {
 
 class Handler {
 public:
@@ -29,5 +29,5 @@ public:
 };
 
 }
-#endif // FAS_HANDLER_H
+#endif // MOXIE_HANDLER_H
 

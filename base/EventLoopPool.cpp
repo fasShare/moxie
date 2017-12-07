@@ -2,27 +2,31 @@
 #include <MutexLocker.h>
 #include <Log.h>
 
-fas::EventLoopPool* fas::EventLoopPool::instance_ = nullptr; 
-fas::EventLoopPool::EventLoopPool() :
-    loops_(),
+moxie::EventLoopPool* moxie::EventLoopPool::instance_ = nullptr; 
+moxie::EventLoopPool::EventLoopPool() :
+	mutex_(),
+    mainLoop_(nullptr),
+	loops_(),
     nextLoops_(),
     next_(0) {
 }
 
-bool fas::EventLoopPool::addEventLoop(long tid, fas::EventLoop* loop, bool ismain) {
+bool moxie::EventLoopPool::addEventLoop(long tid, moxie::EventLoop* loop, bool ismain) {
     MutexLocker locker(mutex_);
     if ((loop == NULL) || (loops_.find(tid) != loops_.end())) {
         return false;
     }
-    loops_[tid] = loop;
     if (!ismain) {
+    	loops_[tid] = loop;
         nextLoops_.push_back(loop);
-    }
+    } else {
+		mainLoop_ = loop;
+	}
     LOGGER_TRACE("Num of EventLoop in Bucket is " << nextLoops_.size());
     return true;
 }
 
-fas::EventLoop *fas::EventLoopPool::getNextLoop() {
+moxie::EventLoop *moxie::EventLoopPool::getNextLoop() {
     MutexLocker locker(mutex_);
     if (nextLoops_.size() == 0) {
         return nullptr;
@@ -33,16 +37,25 @@ fas::EventLoop *fas::EventLoopPool::getNextLoop() {
     return nextLoops_[next_++];
 }
 
-fas::EventLoop *fas::EventLoopPool::getLoop(long tid) {
+moxie::EventLoop *moxie::EventLoopPool::getLoop(long tid) {
     MutexLocker locker(mutex_);
     auto iter = loops_.find(tid);
     if (iter == loops_.end()) {
-        return nullptr;
+		assert(loops_.size() == 0);
+        return mainLoop_;
     }
     return iter->second;
 }
 
-fas::EventLoopPool *fas::EventLoopPool::Instance() {
+moxie::EventLoop* moxie::EventLoopPool::getMainLoop() {
+	MutexLocker locker(mutex_);
+	if (mainLoop_) {
+		return mainLoop_;
+	}
+	return nullptr;
+}
+
+moxie::EventLoopPool *moxie::EventLoopPool::Instance() {
     if (nullptr == instance_) {
         instance_ = new (std::nothrow) EventLoopPool();
     }
