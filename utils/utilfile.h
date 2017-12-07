@@ -1,9 +1,9 @@
-#ifndef FAS_UTILFILE_H
-#define FAS_UTILFILE_H
+#ifndef MOXIE_UTILFILE_H
+#define MOXIE_UTILFILE_H
 #include <string>
 #include <sys/stat.h>
 
-namespace fas {
+namespace moxie {
 
 namespace utils {
 
@@ -16,5 +16,5 @@ off_t FileSizeInBytes(struct stat *buf);
 
 }
 
-#endif // UTILFILE_H
+#endif // MOXIE_UTILFILE_H
 

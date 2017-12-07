@@ -24,7 +24,8 @@ using WillBeClose = boost::function<void (TcpConnShreadPtr, Timestamp)>;
 using CloseCallback = boost::function<void ()>;
     TcpConnection();
     ~TcpConnection();
-
+	
+	bool reset();
     bool init(boost::shared_ptr<Events>& event, const NetAddress& peerAddr, Timestamp now);
 
     int getConnfd() const;

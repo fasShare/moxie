@@ -17,8 +17,18 @@
 moxie::TcpConnection::TcpConnection() {
 }
 
+bool moxie::TcpConnection::reset() {
+	event_.reset();
+	readBuffer_->retrieveAll();
+	writeBuffer_->retrieveAll();
+	shouldClose_ = false;
+	tid_ = -1;
+	dataEmpty_ = true;
+}
+
 bool moxie::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddress& peerAddr, Timestamp now) {
-    event_ = event;
+    event_.reset();
+	event_ = event;
     if (nullptr == readBuffer_) {
         readBuffer_ = boost::shared_ptr<Buffer>(new (std::nothrow) Buffer(1024));
     } else {
@@ -29,7 +39,6 @@ bool moxie::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddre
     } else {
         writeBuffer_->retrieveAll();
     }
-    connfd_ = event_->getFd();
     peerAddr_ = peerAddr;
     shouldClose_ = false;
     acceptTime_ = now;
@@ -39,7 +48,7 @@ bool moxie::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddre
 }
 
 int moxie::TcpConnection::getConnfd() const {
-    return connfd_;
+    return event_->getFd();
 }
 
 void moxie::TcpConnection::setPeerAddr(const moxie::NetAddress& addr) {
