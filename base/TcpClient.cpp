@@ -1,4 +1,5 @@
 #include <TcpClient.h>
+#include <Socket.h>
 #include <TcpConnPool.h>
 #include <EventLoopPool.h>
 #include <Log.h>
@@ -7,14 +8,27 @@ moxie::TcpClient::TcpClient(const NetAddress& addr) :
 	response(),
 	request(),
 	conn_(new TcpConnection()),
-	transfer_(nullptr) {
+	transfer_(nullptr),
+    addr_(addr),
+    sock_(AF_INET, SOCK_STREAM, 0) {
+}
+
+bool moxie::TcpClient::connectToServer() {
+    sock_.setNoBlocking();
+    sock_.setExecClose();
+    if (sock_.connect(addr_)) {
+        boost::shared_ptr<Events> event(new Events(sock_.getSocket(), kNoneEvent));
+        conn_->init(event, addr_, Timestamp::now());
+        return true;
+    }
+    return false;
 }
 
 void moxie::TcpClient::HasData(boost::shared_ptr<TcpConnection> conn, Timestamp time,
 								boost::shared_ptr<TcpClient> client) {
 	assert(conn->getConnfd() == client->conn_->getConnfd());
 	auto transfer = client->transfer_;
-	int length = 0;
+	size_t length = 0;
 	switch (transfer->DataCheck(conn, length)) {
 		case DataTransfer::DATA_ERROR:
 		case DataTransfer::DATA_OK:
@@ -51,7 +65,11 @@ void moxie::TcpClient::SetDataTransfer(DataTransfer *transfer) {
 bool moxie::TcpClient::Talk(boost::shared_ptr<TcpClient> client, 
 							boost::shared_ptr<Message> request,
 							boost::shared_ptr<Message> response, TalkDone done) {
-	if (client->transfer_ == nullptr) {
+    if (!done) {
+        LOGGER_WARN("TcpClient's TalkDone isn't seted.");
+        return false;
+    }
+    if (client->transfer_ == nullptr) {
 		LOGGER_WARN("TcpClient data transfer is not seted.");
 		done(request, response);
 		return false;
@@ -67,16 +85,23 @@ bool moxie::TcpClient::Talk(boost::shared_ptr<TcpClient> client,
 		LOGGER_WARN("write buffer isn't empty.");
 		writebuffer->retrieveAll();
 	}
+	auto loop = EventLoopPool::GetNextLoop();
 	writebuffer->append(request->data(), request->length());
-	
+
+    client->request = request;
+    client->response = response;
+    client->done = done;
+
+    client->conn_->setTid(loop->getTid());
+    client->conn_->getEvent()->setTid(loop->getTid());
+
 	client->conn_->setWriteDone(boost::bind(&TcpClient::WriteDone, _1, _2, client));
 	client->conn_->setHasData(boost::bind(&TcpClient::HasData, _1, _2, client));
 	client->conn_->setWillBeClose(boost::bind(&TcpClient::WillBeClose, _1, _2, client));
 	TcpConnPool::AddTcpConn(client->conn_);
-	
-	auto loop = EventLoopPool::GetNextLoop();
-	client->conn_->enableWrite();
-	client->conn_->disableRead();
+
+	client->conn_->getEvent()->updateEvents(kWriteEvent);
+    client->conn_->getEvent()->setType(EVENT_TYPE_TCPCON);
 	loop->updateEvents(client->conn_->getEvent());
 	
 	return true;

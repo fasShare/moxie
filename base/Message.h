@@ -6,14 +6,20 @@ namespace moxie {
 
 class Message {
 public:
-	int length() {
-		return buffer_.readableBytes();
+	size_t length() {
+		return buffer_->readableBytes();
 	}
 	const char *data() {
-		return buffer_.peek();
+		return buffer_->peek();
 	}
+    void append(const char *data, size_t len) {
+        buffer_->append(data, len);
+    }
+    Message (size_t size) {
+        buffer_ = new Buffer(size);
+    }
 private:
-	Buffer buffer_;
+	Buffer *buffer_;
 };
 
 }

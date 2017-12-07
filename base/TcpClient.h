@@ -1,6 +1,7 @@
 #ifndef MOXIE_TCPCLIENT_H
 #define MOXIE_TCPCLIENT_H
 #include <Events.h>
+#include <Socket.h>
 #include <Message.h>
 #include <NetAddress.h>
 #include <Timestamp.h>
@@ -19,8 +20,8 @@ public:
 		DATA_ERROR,
 		DATA_FATAL,
 	};
-	virtual RET DataCheck(boost::shared_ptr<TcpConnection> conn, int& length) = 0;
-	virtual bool DataFetch(boost::shared_ptr<TcpConnection> conn, int length_from_check,
+	virtual RET DataCheck(boost::shared_ptr<TcpConnection> conn, size_t& length) = 0;
+	virtual bool DataFetch(boost::shared_ptr<TcpConnection> conn, size_t length_from_check,
 					boost::shared_ptr<Message>, boost::shared_ptr<Message>) = 0;
 };
 
@@ -34,6 +35,8 @@ public:
 	static void WillBeClose(boost::shared_ptr<TcpConnection> conn, Timestamp time, boost::shared_ptr<TcpClient> client);
 	void SetDataTransfer(DataTransfer *transfer);
 
+    bool connectToServer();
+
 	static bool Talk(boost::shared_ptr<TcpClient> client, boost::shared_ptr<Message> request, 
 					boost::shared_ptr<Message> response, TalkDone done);
 private:
@@ -41,6 +44,8 @@ private:
 	boost::shared_ptr<Message> request;
 	boost::shared_ptr<TcpConnection> conn_;
 	DataTransfer *transfer_;
+    NetAddress addr_;
+    Socket sock_;
 	TalkDone done;
 };
 

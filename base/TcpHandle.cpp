@@ -47,6 +47,9 @@ void moxie::TcpHandle::handleWrite(boost::shared_ptr<Events> revents, moxie::Tim
     LOGGER_TRACE("In TcpHandle write.");
     auto conn = TcpConnPool::GetTcpConn(revents->getTid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
+        if (!conn) {
+            LOGGER_WARN("conn == null eventTid:" << revents->getTid());
+        }
         assert(false);
     }
     auto writeBuffer = conn->getWriteBuffer();
