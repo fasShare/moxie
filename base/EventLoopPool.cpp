@@ -29,7 +29,7 @@ bool moxie::EventLoopPool::addEventLoop(long tid, moxie::EventLoop* loop, bool i
 moxie::EventLoop *moxie::EventLoopPool::getNextLoop() {
     MutexLocker locker(mutex_);
     if (nextLoops_.size() == 0) {
-        return nullptr;
+		return mainLoop_;
     }
     if (nextLoops_.size() <= next_) {
         next_ = 0;
