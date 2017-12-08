@@ -35,9 +35,19 @@ public:
     static bool RegisterEventHandler(int type, Handler *handler) {
         return HandlePool::AddHandler(type, handler);
     }
+
     static Handler* EventHandler(int type) {
         return HandlePool::GetHandler(type);
     }
+
+	static bool UpdateLoopEvents(boost::shared_ptr<Events> event) {
+		auto loop = EventLoopPool::GetLoop(event->getTid());
+		if (!loop) {
+			assert(false);
+			return false;
+		}
+		return loop->updateEvents(event);
+	}
 };
 
 }

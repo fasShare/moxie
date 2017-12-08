@@ -21,6 +21,14 @@ bool moxie::Timer::getRepeat() const {
     return repeat_;
 }
 
+void moxie::Timer::setTid(long tid) {
+	tid_ = tid;
+}
+
+long moxie::Timer::getTid() const {
+	return tid_;
+}
+
 moxie::Timer::STATE moxie::Timer::getState() const {
     return state_;
 }

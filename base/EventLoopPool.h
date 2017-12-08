@@ -14,11 +14,11 @@ class EventLoop;
 
 class EventLoopPool {
 public:
-    static bool AddEventLoop(long tid, EventLoop* loop) {
-        return Instance()->addEventLoop(tid, loop);
+    static bool AddEventLoop(EventLoop* loop) {
+        return Instance()->addEventLoop(loop->getTid(), loop);
     }
     static bool addMainLoop(EventLoop* loop) {
-		return Instance()->addEventLoop(-1, loop, true);	
+		return Instance()->addEventLoop(loop->getTid(), loop, true);	
     }
     static EventLoop *GetNextLoop() {
         return Instance()->getNextLoop();

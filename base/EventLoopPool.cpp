@@ -16,8 +16,9 @@ bool moxie::EventLoopPool::addEventLoop(long tid, moxie::EventLoop* loop, bool i
     if ((loop == NULL) || (loops_.find(tid) != loops_.end())) {
         return false;
     }
+    
+	loops_[tid] = loop;
     if (!ismain) {
-    	loops_[tid] = loop;
         nextLoops_.push_back(loop);
     } else {
 		mainLoop_ = loop;
@@ -41,8 +42,7 @@ moxie::EventLoop *moxie::EventLoopPool::getLoop(long tid) {
     MutexLocker locker(mutex_);
     auto iter = loops_.find(tid);
     if (iter == loops_.end()) {
-		assert(loops_.size() == 0);
-        return mainLoop_;
+        return nullptr;
     }
     return iter->second;
 }

@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <assert.h>
+#include <Log.h>
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #undef __STDC_FORMAT_MACROS

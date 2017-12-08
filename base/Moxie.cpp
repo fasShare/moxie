@@ -21,7 +21,7 @@ void LoopThreadFunc() {
 		return;
 	}
 
-	if (!moxie::EventLoopPool::AddEventLoop(gettid(), loop)) {
+	if (!moxie::EventLoopPool::AddEventLoop(loop)) {
 		return;
 	}
 

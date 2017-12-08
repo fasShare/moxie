@@ -42,6 +42,7 @@ moxie::EventLoop::EventLoop(PollerFactory *pollerFactory) :
     }
     count_++;
     assert(poll_->EventsAdd(new Events(wakeFd_, kReadEvent)));
+	schedule_->getEvent()->setTid(tid_);
 	updateEvents(schedule_->getEvent());
 }
 
@@ -180,6 +181,7 @@ bool moxie::EventLoop::loop() {
             if (!eventHandleAble(events->second)) {
                 continue;
             }
+			
             Handler * handler = Eventsops::EventHandler(events->second->getType());
             assert(handler);
             handler->doHandle(events->second, looptime);

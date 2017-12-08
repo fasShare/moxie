@@ -1,7 +1,9 @@
 #include <TcpClient.h>
 #include <Socket.h>
 #include <TcpConnPool.h>
+#include <Eventsops.h>
 #include <EventLoopPool.h>
+#include <Thread.h>
 #include <Log.h>
 
 moxie::TcpClient::TcpClient(const NetAddress& addr) :
@@ -14,10 +16,11 @@ moxie::TcpClient::TcpClient(const NetAddress& addr) :
 }
 
 bool moxie::TcpClient::connectToServer() {
-    sock_.setNoBlocking();
+    //sock_.setNoBlocking();
     sock_.setExecClose();
     if (sock_.connect(addr_)) {
         boost::shared_ptr<Events> event(new Events(sock_.getSocket(), kNoneEvent));
+    	sock_.setNoBlocking();
         conn_->init(event, addr_, Timestamp::now());
         return true;
     }
@@ -48,8 +51,8 @@ void moxie::TcpClient::HasData(boost::shared_ptr<TcpConnection> conn, Timestamp 
 void moxie::TcpClient::WriteDone(boost::shared_ptr<TcpConnection> conn, Timestamp time, 
 								boost::shared_ptr<TcpClient> client) {
 	assert(conn->getConnfd() == client->conn_->getConnfd());
-	conn->disableWrite();
-	conn->enableRead();
+	conn->getEvent()->updateEvents(kReadEvent);
+	Eventsops::UpdateLoopEvents(conn->getEvent());
 }
 void moxie::TcpClient::WillBeClose(boost::shared_ptr<TcpConnection> conn, Timestamp time,
 									boost::shared_ptr<TcpClient> client) {
@@ -85,7 +88,7 @@ bool moxie::TcpClient::Talk(boost::shared_ptr<TcpClient> client,
 		LOGGER_WARN("write buffer isn't empty.");
 		writebuffer->retrieveAll();
 	}
-	auto loop = EventLoopPool::GetNextLoop();
+	auto loop = EventLoopPool::GetLoop(gettid());
 	writebuffer->append(request->data(), request->length());
 
     client->request = request;

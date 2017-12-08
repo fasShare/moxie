@@ -35,7 +35,7 @@ void moxie::TimerHeap::getExpiredTimers(std::vector<std::pair<moxie::Timestamp,
 
 void moxie::TimerHeap::restartIntervalTimer(std::vector<std::pair<moxie::Timestamp, moxie::Timer*>>& expired) {
     bool earlistChangeTemp = false;
-    for (auto iter = expired.begin(); iter != expired.end(); iter++) {
+    for (auto iter = expired.begin(); iter != expired.end(); ++iter) {
         if (iter->second->getRepeat() &&
                 (iter->second->getState() != moxie::Timer::STATE::DELETED)) {
             iter->second->restart(moxie::Timestamp::now());
@@ -65,7 +65,7 @@ bool moxie::TimerHeap::addTimer(moxie::Timer *timer) {
         earlistChange_ = true;
     } else {
         earlistChange_ = false;
-        if (earlistExpiration_ != timers_.begin()->second) {
+        if ((timers_.size() == 1) || earlistExpiration_ != timers_.begin()->second) {
             earlistExpiration_ = timers_.begin()->second;
             earlistChange_ = true;
         }

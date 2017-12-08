@@ -10,7 +10,6 @@
 #include <boost/core/ignore_unused.hpp>
 
 void moxie::TimerHandle::handleRead(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
-    LOGGER_TRACE("TimerHandle read.");
 	auto loop = EventLoopPool::GetLoop(revents->getTid());
 	if (!loop) {
 		LOGGER_ERROR("In TimerHandle get null loop.");
@@ -21,6 +20,7 @@ void moxie::TimerHandle::handleRead(boost::shared_ptr<Events> revents, moxie::Ti
 		LOGGER_ERROR("In TimerHandle get null TimerSchedule.");
 		return;
 	}
+	assert(revents->getFd() == schedule->getTimerfd());
 	schedule->handleRead(revents, time);
 }
 
