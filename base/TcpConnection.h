@@ -50,6 +50,10 @@ using CloseCallback = boost::function<void ()>;
     bool enableRead();
     bool disableRead();
 
+	boost::shared_ptr<Events> getEvent() {
+		return event_;
+	}
+
 	void setWriteDone(WriteDone writeDone);
 	void setHasData(HasData hasData);
 	void setWillBeClose(WillBeClose beClose);
@@ -65,7 +69,6 @@ private:
     boost::shared_ptr<Events> event_;
     boost::shared_ptr<Buffer> readBuffer_;
     boost::shared_ptr<Buffer> writeBuffer_;
-    int connfd_;
     NetAddress peerAddr_;
     bool shouldClose_;
     Timestamp acceptTime_;

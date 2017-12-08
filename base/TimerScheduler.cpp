@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <TimerScheduler.h>
+#include <MutexLocker.h>
 #include <EventLoop.h>
 #include <Timestamp.h>
 #include <Log.h>
@@ -62,8 +63,9 @@ bool moxie::TimerScheduler::resetTimer(moxie::Timestamp earlist) {
     }
     return true;
 }
-// If Timer add itself in it's callback. this operator will failed.
+
 bool moxie::TimerScheduler::addTimer(moxie::Timer *timer) {
+	MutexLocker lock(mutex_);
     if (timerCallbackRunning_ == true) {
         auto iter = std::find(expired_.begin(), expired_.end(), \
                 std::make_pair(timer->getExpiration(), timer));
@@ -74,12 +76,14 @@ bool moxie::TimerScheduler::addTimer(moxie::Timer *timer) {
     timerheap_.addTimer(timer);
     if(timerheap_.getEarlistChange()) {
         Timestamp earlist = timerheap_.getEarlistExpiration();
+		LOGGER_WARN("Reset Timer.");
         return resetTimer(earlist);
     }
     return true;
 }
 
 void moxie::TimerScheduler::delTimer(moxie::Timer *timer) {
+	MutexLocker lock(mutex_);
     if (timerCallbackRunning_ == true) {
         auto iter = std::find(expired_.begin(), expired_.end(), \
                 std::make_pair(timer->getExpiration(), timer));
@@ -96,18 +100,21 @@ void moxie::TimerScheduler::delTimer(moxie::Timer *timer) {
 }
 
 void moxie::TimerScheduler::handleRead(boost::shared_ptr<Events> events, moxie::Timestamp time) {
+	MutexLocker lock(mutex_);
     boost::ignore_unused(events, time);
     // now is more accurate than the time of loop wait returned.
     moxie::Timestamp now = moxie::Timestamp::now();
     timerheap_.getExpiredTimers(expired_, now);
-    timerCallbackRunning_ = true;
+
+	timerCallbackRunning_ = true;
     for (auto iter = expired_.begin(); iter != expired_.end(); iter++) {
         if (iter->second->getState() != moxie::Timer::STATE::DELETED) {
             iter->second->run();
         }
     }
     timerCallbackRunning_ = false;
-    timerheap_.restartIntervalTimer(expired_);
+
+	timerheap_.restartIntervalTimer(expired_);
     if (timerheap_.getEarlistChange()) {
         resetTimer(timerheap_.getEarlistExpiration());
     }

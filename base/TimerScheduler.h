@@ -6,6 +6,7 @@
 #include <Timestamp.h>
 #include <Events.h>
 #include <Timer.h>
+#include <Mutex.h>
 
 namespace moxie {
 
@@ -30,6 +31,7 @@ private:
     std::vector<std::pair<Timestamp, Timer*>> expired_;
 	boost::shared_ptr<Events> event_;
     bool timerCallbackRunning_;
+	Mutex mutex_;
 };
 
 }

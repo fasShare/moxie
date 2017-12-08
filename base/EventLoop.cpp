@@ -42,6 +42,7 @@ moxie::EventLoop::EventLoop(PollerFactory *pollerFactory) :
     }
     count_++;
     assert(poll_->EventsAdd(new Events(wakeFd_, kReadEvent)));
+	schedule_->getEvent()->setTid(tid_);
 	updateEvents(schedule_->getEvent());
 }
 
@@ -97,14 +98,18 @@ bool moxie::EventLoop::pollUpdate(boost::shared_ptr<moxie::Events> event) {
         return false;
     }
 
+    auto iter = events_.find(event->getFd()); 
     if (event->isnew()) {
-        auto iter = events_.find(event->getFd()); 
         assert(iter == events_.end());
         events_[event->getFd()] = event;
         LOGGER_TRACE("pollUpdate new");
         return poll_->EventsAdd(event.get());
     } else if (event->ismod()) {
         LOGGER_TRACE("pollUpdate mod");
+        if (iter == events_.end()) {
+            events_[event->getFd()] = event;
+            return poll_->EventsAdd(event.get());
+        }
         return poll_->EventsMod(event.get());
     } else if (event->isdel()) {
         LOGGER_TRACE("pollUpdate del");
@@ -176,6 +181,7 @@ bool moxie::EventLoop::loop() {
             if (!eventHandleAble(events->second)) {
                 continue;
             }
+			
             Handler * handler = Eventsops::EventHandler(events->second->getType());
             assert(handler);
             handler->doHandle(events->second, looptime);

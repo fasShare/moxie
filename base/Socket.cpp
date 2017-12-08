@@ -97,9 +97,12 @@ int moxie::Socket::accept(moxie::NetAddress& addr, bool noblockingexec) {
     return ret;
 }
 
+void moxie::Socket::close() {
+    ::close(socket_);
+}
+
 moxie::Socket::~Socket() {
     LOGGER_TRACE("tid : " << gettid() <<  " socket close!");
-    ::close(socket_);
     state_ = Socket::STATE::CLOSED;
 }
 

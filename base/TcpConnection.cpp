@@ -24,6 +24,7 @@ bool moxie::TcpConnection::reset() {
 	shouldClose_ = false;
 	tid_ = -1;
 	dataEmpty_ = true;
+	return true;
 }
 
 bool moxie::TcpConnection::init(boost::shared_ptr<Events>& event, const NetAddress& peerAddr, Timestamp now) {
