@@ -12,6 +12,8 @@
 
 namespace moxie {
 
+class ServiceClient;
+
 class DataTransfer {
 public:
 	enum RET {
@@ -35,6 +37,12 @@ public:
 	static void WillBeClose(boost::shared_ptr<TcpConnection> conn, Timestamp time, boost::shared_ptr<TcpClient> client);
 	void SetDataTransfer(DataTransfer *transfer);
 
+    void setIndex(long index);
+    long getIndex() const;
+    void setService(ServiceClient *service);
+        
+    static bool RemoveFromServiceClient(boost::shared_ptr<TcpClient> client);
+
     bool connectToServer();
     bool initWithEvent(boost::shared_ptr<Events> event);
 	static bool Talk(boost::shared_ptr<TcpClient> client, boost::shared_ptr<Message> request, 
@@ -47,6 +55,8 @@ private:
     NetAddress addr_;
     Socket sock_;
 	TalkDone done;
+    long index_;
+    ServiceClient *service_;
 };
 
 }

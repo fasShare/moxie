@@ -9,6 +9,7 @@
 #include <list>
 
 moxie::ServiceClient::ServiceClient() :
+    tid_(gettid()),
     mutex_(), 
     cond_(mutex_),
     name_(""),
@@ -17,16 +18,36 @@ moxie::ServiceClient::ServiceClient() :
     used_() {
 }
 
+void moxie::ServiceClient::setName(const std::string& name) {
+    name_ = name;
+}
+
+std::string moxie::ServiceClient::getName() const {
+    return name_;
+}
+
+long moxie::ServiceClient::getTid() const {
+    return tid_;
+}
+
+void moxie::ServiceClient::setTid(long tid) {
+    tid_ = tid;
+}
+
 bool moxie::ServiceClient::init(const std::vector<NetAddress>& addr, const std::string& name) {
     name_ = name;
-    for (auto iter = addr.begin(); iter != addr.end(); ++iter) {
-        boost::shared_ptr<TcpClient> client(new TcpClient(*iter));
-        if (!client->connectToServer()) {
+    for (size_t index  = 0; index < addr.size(); ++index) {
+        std::vector<boost::shared_ptr<TcpClient>> clients;
+        if (buildClientOfAddr(addr[index], clients)) {
             return false;
         }
-        addrs_.emplace_back(*iter);
+        addrs_.emplace_back(addr[index]);
         boost::shared_ptr<ClientSet> clientset(new ClientSet);
-        assert(clientset->store(client));
+        for (size_t k = 0; k < clients.size(); ++k) {
+            clients[k]->setIndex(index);
+            clients[k]->setService(this);
+        }
+        assert(clientset->store(clients));
         free_.emplace_back(clientset);
     }
     return true;
@@ -55,6 +76,18 @@ boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::getClient() {
     return client;
 }
 
+bool moxie::ServiceClient::removeClientUsed(size_t index, boost::shared_ptr<TcpClient> client) {
+    if (free_.size() != used_.size() || free_.size() == 0
+        || used_.size() == 0 || index >= used_.size()) {
+        return false;
+    }
+    {
+        MutexLocker locker(mutex_);
+        assert(used_[index]->erase(client));
+    }
+    return true;
+}
+
 bool moxie::ServiceClient::putClient(boost::shared_ptr<TcpClient> client) {
     if (free_.size() != used_.size() || free_.size() == 0 || used_.size() == 0) {
         return false;
@@ -69,7 +102,7 @@ bool moxie::ServiceClient::putClient(boost::shared_ptr<TcpClient> client) {
     return true;
 }
 
-void  moxie::ServiceClient::buildNewClientThread(size_t index) {
+bool moxie::ServiceClient::buildClientOfAddr(const NetAddress& addr, std::vector<boost::shared_ptr<TcpClient>>& clients) {
     std::unordered_map<int, boost::shared_ptr<moxie::Events>> eventMap;
     int interval = 5;
     int count = 0;
@@ -78,7 +111,7 @@ void  moxie::ServiceClient::buildNewClientThread(size_t index) {
         moxie::Socket sock(AF_INET, SOCK_STREAM, 0);
         sock.setNoBlocking();
         sock.setExecClose();
-        if (!sock.connect(addrs_[index])) {
+        if (!sock.connect(addr)) {
             continue;
         }
         boost::shared_ptr<moxie::Events> event(new Events(sock.getSocket(), 
@@ -87,27 +120,39 @@ void  moxie::ServiceClient::buildNewClientThread(size_t index) {
         poller.EventsAdd(event.get());
         count++;
     }
-
+    if (count == 0) {
+        return false;
+    }
     int timeout = 100;
     std::vector<PollerEvent_t> revents;
     poller.Loop(revents, timeout);
     if (revents.size() == 0) {
-        return;
+        return false;
     }
-
-    std::vector<boost::shared_ptr<TcpClient>> clients;
+    int clientNum = 0;
     for (size_t i = 0; i < revents.size(); ++i) {
         if (!checkConnectSucc(revents[i].fd)) {
             continue;
         }
         boost::shared_ptr<moxie::Events> event = eventMap[revents[i].fd];
-        boost::shared_ptr<TcpClient> client(new TcpClient(addrs_[index]));
+        boost::shared_ptr<TcpClient> client(new TcpClient(addr));
         client->initWithEvent(event);
         clients.emplace_back(client);
+        clientNum++;
+    }
+    return clientNum > 0;
+}
+
+void moxie::ServiceClient::buildNewClientThread(size_t index) {
+    std::vector<boost::shared_ptr<TcpClient>> clients;
+    if (!((index < addrs_.size()) && buildClientOfAddr(addrs_[index], clients))) {
+        return;
     }
     if (clients.size() > 0) {
         MutexLocker locker(mutex_);
         for (size_t k = 0; k < clients.size(); ++k) {
+            clients[k]->setIndex(index);
+            clients[k]->setService(this);
             free_[index]->store(clients[k]);
         }
     }

@@ -25,6 +25,14 @@ public:
     bool store(boost::shared_ptr<TcpClient> client) {
         return clients_.emplace(client).second;
     }
+    bool store(std::vector<boost::shared_ptr<TcpClient>>& clients) {
+        for (auto& client : clients) {
+            if (clients_.emplace(client).second) {
+                return false;
+            }
+        }
+        return true;
+    }
     bool erase(boost::shared_ptr<TcpClient> client) {
         return clients_.erase(client) == 1;
     }
@@ -42,8 +50,16 @@ public:
     boost::shared_ptr<TcpClient> getClient();
     bool putClient(boost::shared_ptr<TcpClient>);
     void buildNewClientThread(size_t index);
+    bool removeClientUsed(size_t index, boost::shared_ptr<TcpClient> client);
+    
+    void setTid(long tid);
+    long getTid() const;
+    void setName(const std::string& name);
+    std::string getName() const;
 private:
+    bool buildClientOfAddr(const NetAddress& addr, std::vector<boost::shared_ptr<TcpClient>>& clients);
     bool checkConnectSucc(int sd);
+    long tid_;
     Mutex mutex_;
     Condition cond_;
     std::string name_;

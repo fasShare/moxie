@@ -3,6 +3,7 @@
 #include <TcpConnPool.h>
 #include <Eventsops.h>
 #include <EventLoopPool.h>
+#include <ServiceClient.h>
 #include <Thread.h>
 #include <Log.h>
 
@@ -12,7 +13,9 @@ moxie::TcpClient::TcpClient(const NetAddress& addr) :
 	conn_(new TcpConnection()),
 	transfer_(nullptr),
     addr_(addr),
-    sock_(AF_INET, SOCK_STREAM, 0) {
+    sock_(AF_INET, SOCK_STREAM, 0),
+    index_(-1),
+    service_(nullptr) {
 }
 
 bool moxie::TcpClient::connectToServer() {
@@ -32,27 +35,50 @@ bool moxie::TcpClient::initWithEvent(boost::shared_ptr<Events> event) {
     return true;
 }
 
+void moxie::TcpClient::setService(ServiceClient *service) {
+    service_ = service;
+}
+
 void moxie::TcpClient::HasData(boost::shared_ptr<TcpConnection> conn, Timestamp time,
 								boost::shared_ptr<TcpClient> client) {
 	assert(conn->getConnfd() == client->conn_->getConnfd());
 	auto transfer = client->transfer_;
 	size_t length = 0;
 	switch (transfer->DataCheck(conn, length)) {
-		case DataTransfer::DATA_ERROR:
 		case DataTransfer::DATA_OK:
 			if (transfer->DataFetch(conn, length, client->request, client->response)) {
 				client->done(client->request, client->response);
+
 			} else {
 				LOGGER_WARN("DataFetch failed!");
 			}
 			break;
 		case DataTransfer::DATA_INCOMPLETE:
 			break;
-		case DataTransfer::DATA_FATAL:
+		case DataTransfer::DATA_ERROR:
+            client->done(client->request, client->response);
+            TcpConnection::shutdown(conn);
+            RemoveFromServiceClient(client);
 		default:
 			assert(false);
 	}
 }
+
+void moxie::TcpClient::setIndex(long index) {
+    index_ = index;
+}
+
+long moxie::TcpClient::getIndex() const {
+    return index_;
+}
+
+bool moxie::TcpClient::RemoveFromServiceClient(boost::shared_ptr<TcpClient> client) {
+    assert(client->service_);
+    assert(client->index_ != -1);
+    auto service = client->service_;
+    return service->removeClientUsed(client->index_, client);
+}
+
 void moxie::TcpClient::WriteDone(boost::shared_ptr<TcpConnection> conn, Timestamp time, 
 								boost::shared_ptr<TcpClient> client) {
 	assert(conn->getConnfd() == client->conn_->getConnfd());
