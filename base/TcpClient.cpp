@@ -27,6 +27,11 @@ bool moxie::TcpClient::connectToServer() {
     return false;
 }
 
+bool moxie::TcpClient::initWithEvent(boost::shared_ptr<Events> event) {
+    conn_->init(event, addr_, Timestamp::now());
+    return true;
+}
+
 void moxie::TcpClient::HasData(boost::shared_ptr<TcpConnection> conn, Timestamp time,
 								boost::shared_ptr<TcpClient> client) {
 	assert(conn->getConnfd() == client->conn_->getConnfd());

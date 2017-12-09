@@ -36,7 +36,7 @@ public:
 	void SetDataTransfer(DataTransfer *transfer);
 
     bool connectToServer();
-
+    bool initWithEvent(boost::shared_ptr<Events> event);
 	static bool Talk(boost::shared_ptr<TcpClient> client, boost::shared_ptr<Message> request, 
 					boost::shared_ptr<Message> response, TalkDone done);
 private:
