@@ -9,6 +9,8 @@
 #include <HandlePool.h>
 #include <TcpHandle.h>
 #include <TimerHandle.h>
+#include <EventfdHandle.h>
+#include <ServiceManager.h>
 #include <Eventsops.h>
 
 #include <boost/function.hpp>
@@ -16,6 +18,11 @@
 moxie::Moxie *moxie::Moxie::moxie_ = nullptr;
 
 void LoopThreadFunc() {
+    moxie::ServiceManager manager(moxie::Moxie::getConf().getAddress());
+    if (!manager.createClientForThisThread()) {
+        LOGGER_ERROR("Create clients error in this thread.");
+        return;
+    }
     moxie::EventLoop *loop = new (std::nothrow) moxie::EventLoop();
 	if (nullptr == loop) {
 		return;
@@ -34,17 +41,20 @@ moxie::Moxie::Moxie() :
     signor_() {
 }
 
-bool moxie::Moxie::MoxieInit(MoxieArgsType args) {
-    Instance()->RegisterHandler();
-    return Instance()->init(args);
+const moxie::MoxieConf& moxie::Moxie::getConf() {
+    return Instance()->conf_;
 }
 
-bool moxie::Moxie::init(MoxieArgsType args) {
-    if (args.InitFunc) {
-        args.InitFunc();
-    }
-    if (args.ThreadNum > 0) {
-		threadPool_ = new (std::nothrow) ThreadPool(args.ThreadNum, LoopThreadFunc, "WorkLoopThreadPool");
+bool moxie::Moxie::MoxieInit(const MoxieConf& conf) {
+    Instance()->conf_ = conf;
+    Instance()->RegisterHandler();
+    return Instance()->init(conf);
+}
+
+bool moxie::Moxie::init(const MoxieConf& conf) {
+    int ThreadNum = conf.getThreadNum();
+    if (ThreadNum > 0) {
+		threadPool_ = new (std::nothrow) ThreadPool(ThreadNum, LoopThreadFunc, "WorkLoopThreadPool");
 		assert(Instance()->threadPool_);
 		Instance()->threadPool_->start();
     }
@@ -53,6 +63,12 @@ bool moxie::Moxie::init(MoxieArgsType args) {
 }
 
 bool moxie::Moxie::Run() {
+    ServiceManager manager(getConf().getAddress());
+    if (!manager.createClientForThisThread()) {
+        LOGGER_ERROR("Create clients error in this thread.");
+        return false;
+    }
+
     return Instance()->loop_->loop();
 }
 
@@ -67,4 +83,5 @@ moxie::Moxie* moxie::Moxie::Instance() {
 void moxie::Moxie::RegisterHandler() {
     Eventsops::RegisterEventHandler(EVENT_TYPE_TCPCON, new TcpHandle());
     Eventsops::RegisterEventHandler(EVENT_TYPE_TIMER, new TimerHandle());
+    Eventsops::RegisterEventHandler(EVENT_TYPE_EVENT, new EventfdHandle());
 }

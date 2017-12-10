@@ -3,7 +3,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
-
+#include <string>
 
 namespace moxie {
 
@@ -17,13 +17,16 @@ public:
     struct sockaddr *addrPtr();
     const struct sockaddr *addrPtr() const;
     socklen_t addrLen() const;
-
+    const std::string& getIp() const;
+    int getPort() const;
 private:
     sa_family_t family_;
     union {
         struct sockaddr_in addr_;
         struct sockaddr_in6 addr6_;
     };
+    std::string ip_;
+    int port_;
 };
 
 }

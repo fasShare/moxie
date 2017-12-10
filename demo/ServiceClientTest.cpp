@@ -5,11 +5,13 @@
 #include <Timestamp.h>
 #include <TcpConnection.h>
 #include <Moxie.h>
+#include <MoxieConf.h>
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <Message.h>
 #include <Timerops.h>
 #include <TcpClient.h>
+#include <ServiceClientPool.h>
 
 using namespace moxie;
 
@@ -32,27 +34,30 @@ void TalkDone(boost::shared_ptr<Message> request,
     std::cout << response->data() << std::endl;
 }
 
-void Timerfunc(boost::shared_ptr<TcpClient> client) {
-	boost::shared_ptr<Message> request(new Message(1024)), response(new Message(1024));
+void Timerfunc() {
+	auto service = ServiceClientPool::GetService(gettid(), "Server");
+
+    if (service == nullptr) {
+        LOGGER_WARN("Get nullptr service.");
+        return;
+    }
+    LOGGER_TRACE("Before getClient.");
+    auto client = service->getClient();
+    LOGGER_TRACE("After getClient.");
+    client->SetDataTransfer(new mydataTransfer());
+
+    boost::shared_ptr<Message> request(new Message(1024)), response(new Message(1024));
 	request->append("shangxiaofei", strlen("shangxiaofei"));
 	TcpClient::Talk(client, request, response, TalkDone);
 }
 
 int main() {
-	MoxieArgsType args;
-	args.ThreadNum = 0;
+    MoxieConf conf;
+    conf.load("./conf/MoxieClient.conf");
 
-	Moxie::MoxieInit(args);
-
-    NetAddress addr(AF_INET, 6686, "127.0.0.1");
-    boost::shared_ptr<TcpClient> client(new TcpClient(addr));
-    if (!client->connectToServer()) {
-        std::cerr << "connect to server error." << std::endl;
-        return -1;
-    }
-    client->SetDataTransfer(new mydataTransfer());
+	Moxie::MoxieInit(conf);
     
-	Timer *timer = new Timer(boost::bind(Timerfunc, client), addTime(Timestamp::now(), 5), 3);
+	Timer *timer = new Timer(Timerfunc, addTime(Timestamp::now(), 5), 5);
 	Timerops::AddTimer(timer);
 
 	Moxie::Run();

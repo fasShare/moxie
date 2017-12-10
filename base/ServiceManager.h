@@ -12,6 +12,7 @@ namespace moxie {
 
 class ServiceManager {
 public:
+    ServiceManager(std::map<std::string, std::vector<NetAddress>> addrs);
     bool createClientForThisThread();
 private:
     std::map<std::string, std::vector<NetAddress>> addrs_;

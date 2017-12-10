@@ -23,6 +23,7 @@ void work() {
         write(client.getSocket(), buf, bytes);
         usleep(100);
         write(client.getSocket(), buf, bytes);
+        client.close();
     }
 }
 

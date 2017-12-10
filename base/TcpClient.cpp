@@ -48,7 +48,7 @@ void moxie::TcpClient::HasData(boost::shared_ptr<TcpConnection> conn, Timestamp 
 		case DataTransfer::DATA_OK:
 			if (transfer->DataFetch(conn, length, client->request, client->response)) {
 				client->done(client->request, client->response);
-
+                RecycleClient(client);
 			} else {
 				LOGGER_WARN("DataFetch failed!");
 			}
@@ -58,7 +58,7 @@ void moxie::TcpClient::HasData(boost::shared_ptr<TcpConnection> conn, Timestamp 
 		case DataTransfer::DATA_ERROR:
             client->done(client->request, client->response);
             TcpConnection::shutdown(conn);
-            RemoveFromServiceClient(client);
+            RecycleClient(client);
 		default:
 			assert(false);
 	}
@@ -72,7 +72,7 @@ long moxie::TcpClient::getIndex() const {
     return index_;
 }
 
-bool moxie::TcpClient::RemoveFromServiceClient(boost::shared_ptr<TcpClient> client) {
+bool moxie::TcpClient::RecycleClient(boost::shared_ptr<TcpClient> client) {
     assert(client->service_);
     assert(client->index_ != -1);
     auto service = client->service_;

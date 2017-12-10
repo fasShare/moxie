@@ -2,6 +2,7 @@
 #include <MutexLocker.h>
 #include <TcpClient.h>
 #include <Thread.h>
+#include <Timer.h>
 #include <ServiceClient.h>
 
 #include <unordered_map>
@@ -38,9 +39,11 @@ bool moxie::ServiceClient::init(const std::vector<NetAddress>& addr, const std::
     name_ = name;
     for (size_t index  = 0; index < addr.size(); ++index) {
         std::vector<boost::shared_ptr<TcpClient>> clients;
-        if (buildClientOfAddr(addr[index], clients)) {
+        if (!buildClientOfAddr(addr[index], clients)) {
+            LOGGER_ERROR("build client of service[" << name << "] error");
             return false;
         }
+        LOGGER_TRACE("build " << clients.size() << " of service[" << name << "]");
         addrs_.emplace_back(addr[index]);
         boost::shared_ptr<ClientSet> clientset(new ClientSet);
         for (size_t k = 0; k < clients.size(); ++k) {
@@ -49,31 +52,61 @@ bool moxie::ServiceClient::init(const std::vector<NetAddress>& addr, const std::
         }
         assert(clientset->store(clients));
         free_.emplace_back(clientset);
+        // put empty clientset to used.
+        used_.emplace_back(new ClientSet);
+        status_.emplace_back(ALIVE);
     }
     return true;
 }
 
 boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::getClient() {
     if (free_.size() != used_.size() || free_.size() == 0 || used_.size() == 0) {
+        LOGGER_ERROR("check size error in getClient.");
         return nullptr;
     }
     size_t index = 0;
 
     auto clientset = free_[index];
     size_t size = 0;
+    boost::shared_ptr<moxie::TcpClient> client;
     {
         MutexLocker locker(mutex_);
         size = clientset->size();
+        // 如果有空闲client的话则直接取
+        if (size > 0) {
+            client = clientset->fetch();
+            used_[index]->store(client);
+            LOGGER_TRACE("free client num[" << clientset->size()
+                    << "] used client num[" << used_[index]->size() << "].");
+            return client;
+        }
     }
-    while (size == 0) {
-        cond_.wait();
-        size = clientset->size();
+    // 没有client则调到条件循环中等待，只等待3s，有空闲client
+    int waitcount = 0;
+    while (size == 0 && waitcount < 3) {
+        LOGGER_TRACE("free client num[" << size << "].");
+        // 开辟一个线程创建新的client,暂时使用这种方式，后续会做优化 
         Thread thread(boost::bind(&ServiceClient::buildNewClientThread, this, index));
         thread.start();
+        
+        cond_.waitForSeconds(1);
+        waitcount++;
+        size = clientset->size();
+        if (size > 0) {
+            client = clientset->fetch();
+            used_[index]->store(client);
+            LOGGER_TRACE("free client num[" << clientset->size() 
+                    << "] used client num[" << used_[index]->size() << "].");
+            mutex_.unlock();
+            return client;
+        }
     }
-    auto client = clientset->fetch();
-    used_[index]->store(client);
     return client;
+}
+
+void moxie::ServiceClient::beginCheckServerAlive(const NetAddress& addr, size_t index, const std::string& name) {
+    MutexLocker locker(mutex_);
+    status_[index] = CHECKING;
 }
 
 bool moxie::ServiceClient::removeClientUsed(size_t index, boost::shared_ptr<TcpClient> client) {
@@ -83,6 +116,7 @@ bool moxie::ServiceClient::removeClientUsed(size_t index, boost::shared_ptr<TcpC
     }
     {
         MutexLocker locker(mutex_);
+        free_[index]->store(client);
         assert(used_[index]->erase(client));
     }
     return true;
@@ -112,6 +146,8 @@ bool moxie::ServiceClient::buildClientOfAddr(const NetAddress& addr, std::vector
         sock.setNoBlocking();
         sock.setExecClose();
         if (!sock.connect(addr)) {
+            LOGGER_ERROR("Socket connect error of ip[" << addr.getIp() 
+                                << "] port[" << addr.getPort() << "].");
             continue;
         }
         boost::shared_ptr<moxie::Events> event(new Events(sock.getSocket(), 
@@ -121,6 +157,7 @@ bool moxie::ServiceClient::buildClientOfAddr(const NetAddress& addr, std::vector
         count++;
     }
     if (count == 0) {
+        LOGGER_ERROR("no avild connected socket");
         return false;
     }
     int timeout = 100;
@@ -146,6 +183,9 @@ bool moxie::ServiceClient::buildClientOfAddr(const NetAddress& addr, std::vector
 void moxie::ServiceClient::buildNewClientThread(size_t index) {
     std::vector<boost::shared_ptr<TcpClient>> clients;
     if (!((index < addrs_.size()) && buildClientOfAddr(addrs_[index], clients))) {
+        if (index < addrs_.size()) {
+            beginCheckServerAlive(addrs_[index], index, name_);
+        }
         return;
     }
     if (clients.size() > 0) {

@@ -9,7 +9,9 @@
 #include <boost/implicit_cast.hpp>
 
 moxie::NetAddress::NetAddress(ushort sa_family, int sa_port, const char *sa_ip):
-    family_(sa_family) {
+    family_(sa_family),
+    ip_(sa_ip),
+    port_(sa_port) {
     // FIXME : AF_INET and AF_INET6
     if (family_ == AF_INET) {
         ::bzero(&addr_, sizeof(struct sockaddr_in));
@@ -22,6 +24,14 @@ moxie::NetAddress::NetAddress(ushort sa_family, int sa_port, const char *sa_ip):
         addr6_.sin6_port = htobe16(sa_port);
         ::inet_pton(family_, sa_ip, &(addr6_.sin6_addr));
     }
+}
+
+const std::string& moxie::NetAddress::getIp() const {
+    return ip_;
+}
+
+int moxie::NetAddress::getPort() const {
+    return port_;
 }
 
 struct sockaddr *moxie::NetAddress::addrPtr() {

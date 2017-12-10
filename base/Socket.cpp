@@ -102,7 +102,7 @@ void moxie::Socket::close() {
 }
 
 moxie::Socket::~Socket() {
-    LOGGER_TRACE("tid : " << gettid() <<  " socket close!");
+    LOGGER_TRACE("tid : " << gettid() <<  " Socket destroyed!");
     state_ = Socket::STATE::CLOSED;
 }
 

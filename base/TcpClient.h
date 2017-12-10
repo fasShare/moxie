@@ -41,7 +41,7 @@ public:
     long getIndex() const;
     void setService(ServiceClient *service);
         
-    static bool RemoveFromServiceClient(boost::shared_ptr<TcpClient> client);
+    static bool RecycleClient(boost::shared_ptr<TcpClient> client);
 
     bool connectToServer();
     bool initWithEvent(boost::shared_ptr<Events> event);

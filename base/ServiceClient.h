@@ -27,7 +27,7 @@ public:
     }
     bool store(std::vector<boost::shared_ptr<TcpClient>>& clients) {
         for (auto& client : clients) {
-            if (clients_.emplace(client).second) {
+            if (!clients_.emplace(client).second) {
                 return false;
             }
         }
@@ -45,6 +45,11 @@ private:
 
 class ServiceClient {
 public:
+    enum status {
+        ALIVE,
+        DEAD,
+        CHECKING,
+    };
     ServiceClient();
     bool init(const std::vector<NetAddress>& addr, const std::string& name);
     boost::shared_ptr<TcpClient> getClient();
@@ -59,6 +64,7 @@ public:
 private:
     bool buildClientOfAddr(const NetAddress& addr, std::vector<boost::shared_ptr<TcpClient>>& clients);
     bool checkConnectSucc(int sd);
+    void beginCheckServerAlive(const NetAddress& addr, size_t index, const std::string& name);
     long tid_;
     Mutex mutex_;
     Condition cond_;
@@ -66,6 +72,7 @@ private:
     std::vector<NetAddress> addrs_;
     std::vector<boost::shared_ptr<ClientSet>> free_;
     std::vector<boost::shared_ptr<ClientSet>> used_;
+    std::vector<status> status_;
 };
 
 }

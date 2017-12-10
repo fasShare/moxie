@@ -66,6 +66,7 @@ private:
 
     bool quit_;
     int wakeFd_;
+    boost::shared_ptr<Events> wakeEvent_;
 };
 
 int CreateEventfd();

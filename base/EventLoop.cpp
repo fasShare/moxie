@@ -35,15 +35,17 @@ moxie::EventLoop::EventLoop(PollerFactory *pollerFactory) :
     mutex_(),
     tid_(gettid()),
     quit_(false),
-    wakeFd_(CreateEventfd()) {
+    wakeFd_(CreateEventfd()),
+    wakeEvent_(new Events(wakeFd_, kReadEvent)) {
     poll_ = pollerFactory_->getPoller();
     if (!poll_) {
         LOGGER_SYSERR("New Poller error!");
     }
     count_++;
-    assert(poll_->EventsAdd(new Events(wakeFd_, kReadEvent)));
+    wakeEvent_->setType(EVENT_TYPE_EVENT);
 	schedule_->getEvent()->setTid(tid_);
 	updateEvents(schedule_->getEvent());
+	updateEvents(wakeEvent_);
 }
 
 int moxie::CreateEventfd() {
@@ -171,7 +173,7 @@ bool moxie::EventLoop::loop() {
             pollUpdate(*iter);
         }
 
-        looptime = poll_->Loop(occur, 10000000);
+        looptime = poll_->Loop(occur, 100000);
         for(auto iter = occur.begin(); iter != occur.end(); iter++) {
             auto events = events_.find(iter->fd);
             if (events == events_.end()) {
