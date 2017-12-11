@@ -13,31 +13,25 @@ StaticLibrary('./lib/fas',
         Glob("base/*.cpp"),
         LIBPATH = ['lib'],
         CPPPATH = ['.', 'utils', 'base'],
-        LIBS = ['fasutils', 'glog', 'pthread'],
+        LIBS = ['fasutils', 'glog', 'pthread', 'jsoncpp'],
         CCFLAGS = FAS_CFLAGS
         )
 
 Program('demo/bin/Client', 'demo/Client.cpp',
         LIBPATH = ['lib'],
         CPPPATH = ['.', 'utils', 'base'],
-        LIBS = ['fasutils', 'fas', 'glog', 'pthread'],
-        CCFLAGS = ['-Wall', '-static', '-std=c++11']
-       )
-Program('demo/bin/TcpClient', 'demo/TcpClientTest.cpp',
-        LIBPATH = ['lib'],
-        CPPPATH = ['.', 'utils', 'base'],
-        LIBS = ['fasutils', 'fas', 'glog', 'pthread'],
+        LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],
         CCFLAGS = ['-Wall', '-static', '-std=c++11']
        )
 Program('demo/bin/Server', 'demo/server.cpp',
         LIBPATH = ['lib'],
         CPPPATH = ['.', 'utils', 'base'],
-        LIBS = ['fasutils', 'fas', 'glog', 'pthread'],
+        LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],
         CCFLAGS = ['-Wall', '-static', '-std=c++11']
        )
 Program('demo/bin/LogDemo', 'demo/Logdemo.cpp',
         LIBPATH = ['lib'],
         CPPPATH = ['.', 'utils', 'base'],
-        LIBS = ['fasutils', 'fas', 'glog', 'pthread'],
+        LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],
         CCFLAGS = ['-Wall', '-static', '-std=c++11']
        )

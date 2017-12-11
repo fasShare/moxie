@@ -21,13 +21,10 @@ void NewConnection(boost::shared_ptr<TcpConnection> conn, Timestamp time) {
 }
 
 int main() {
-	CommonLog::MinLogLevelOutput(LOG_WARN);
-	FLAGS_logbufsecs = 0;
+    MoxieConf conf;
+    conf.load("./conf/moxie.conf");
 
-	MoxieArgsType args;
-	args.ThreadNum = 0;
-
-	Moxie::MoxieInit(args);
+	Moxie::MoxieInit(conf);
     
 	TcpServer *ser = new TcpServer(NetAddress(AF_INET, 6686, "127.0.0.1"), 10);
 	ser->setNewConnCallback(NewConnection);

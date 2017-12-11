@@ -1,6 +1,7 @@
 #ifndef MOXIE_MOXIE_H
 #define MOXIE_MOXIE_H
 #include <SigIgnore.h>
+#include <MoxieConf.h>
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
@@ -8,31 +9,24 @@
 namespace moxie {
 
 class EventLoop;
-class ThreadPool;
-
-typedef struct moxie_args_t{
-	int ThreadNum;
-	boost::function<void ()> InitFunc;
-
-	moxie_args_t () {
-		ThreadNum = 1;
-	}
-} MoxieArgsType;	
+class ThreadPool;	
 
 class Moxie {
 public:
-    static bool MoxieInit(MoxieArgsType args);
+    static bool MoxieInit(const MoxieConf& conf);
+    static const MoxieConf& getConf();
 	static bool Run();
 private:
     static Moxie* Instance();
     void RegisterHandler();
-    bool init(MoxieArgsType args);
+    bool init(const MoxieConf& conf);
     Moxie();
 
 	ThreadPool *threadPool_;
 	EventLoop *loop_;
 	static Moxie *moxie_;
 	SigIgnore signor_;
+    MoxieConf conf_;
 };
 
 }

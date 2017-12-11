@@ -77,7 +77,7 @@ reWrite:
                 revents->setState(Events::state::DEL);
                 TcpConnPool::RemoveTcpConn(conn);
             }
-            auto loop = EventLoopPool::GetLoop(gettid());
+            auto loop = EventLoopPool::GetLoop(revents->getTid());
             if (!loop) {
                 assert(false);
             }
