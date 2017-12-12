@@ -2,8 +2,8 @@
 #define MOXIE_COROUTINE_H
 #include <Log.h>
 
-#include <boost/include/boost/context/continuation.hpp>
-#include <boost/include/boost/function.hpp>
+#include <boost/context/continuation.hpp>
+#include <boost/function.hpp>
 
 namespace moxie {
 
@@ -37,7 +37,7 @@ public:
 		});  
 	}
 	bool vaild() const {
-		return (bool)continue_;
+		return static_cast<bool>(continue_);
 	}
 	void resume() {
 		continue_ = continue_.resume();

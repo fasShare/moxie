@@ -1,5 +1,7 @@
 #include <MoxieCoroutine.h>
 
+using namespace moxie;
+
 void CoroutineTestFunc();
 
 MoxieCoroutine *coroutine = new MoxieCoroutine(CoroutineTestFunc);
