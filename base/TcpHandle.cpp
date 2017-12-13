@@ -15,8 +15,7 @@
 #include <boost/core/ignore_unused.hpp>
 
 void moxie::TcpHandle::handleRead(boost::shared_ptr<Events> revents, moxie::Timestamp time) {
-    LOGGER_TRACE("In TcpHandle read.");
-    auto conn = TcpConnPool::GetTcpConn(gettid(), revents->getFd());
+	auto conn = TcpConnPool::GetTcpConn(revents->getTid(), revents->getFd());
     if (!(conn && revents->getFd() == conn->getConnfd())) {
         if (conn == nullptr) {
             LOGGER_TRACE("conn is null.");
