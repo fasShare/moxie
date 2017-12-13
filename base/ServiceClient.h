@@ -50,22 +50,36 @@ public:
         DEAD,
         CHECKING,
     };
+	enum LoadBalance {
+		ROBIN,
+	};
     ServiceClient();
     bool init(const std::vector<NetAddress>& addr, const std::string& name);
-    boost::shared_ptr<TcpClient> getClient();
+	boost::shared_ptr<TcpClient> getClient(const std::string& key, LoadBalance py);
+	boost::shared_ptr<TcpClient> getClient();
     bool putClient(boost::shared_ptr<TcpClient>);
     void buildNewClientThread(size_t index);
     bool removeClientUsed(size_t index, boost::shared_ptr<TcpClient> client);
-    
+	boost::shared_ptr<moxie::TcpClient> fetchClientFromOther(boost::shared_ptr<ServiceClient> service, size_t index);
+
     void setTid(long tid);
     long getTid() const;
     void setName(const std::string& name);
     std::string getName() const;
+	size_t getFreeSize();
+
+	bool checkInOwner() const;
 private:
+	boost::shared_ptr<TcpClient> removeClientToOther(size_t index);
+	size_t getBackEnd(const std::string& key, LoadBalance py);
+	boost::shared_ptr<TcpClient> getClient(size_t index);
+	boost::shared_ptr<TcpClient> removeClient(size_t index);
     bool buildClientOfAddr(const NetAddress& addr, std::vector<boost::shared_ptr<TcpClient>>& clients);
-    bool checkConnectSucc(int sd);
+	boost::shared_ptr<moxie::TcpClient> getClientGlobal(const std::string& name_, const size_t index);
+	bool checkConnectSucc(int sd);
     void beginCheckServerAlive(const NetAddress& addr, size_t index, const std::string& name);
     long tid_;
+	size_t freeSize_;
     Mutex mutex_;
     Condition cond_;
     std::string name_;

@@ -3,7 +3,8 @@
 using namespace moxie;
 
 int main() {
-    CommonLog::OpenLog("./", LOG_WARN, "warning", "error", "info", "fatal");
+	LogConf conf;
+    CommonLog::OpenLog(conf);
 
     LOGGER_INFO("warning test.");
 

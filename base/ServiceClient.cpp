@@ -3,6 +3,7 @@
 #include <TcpClient.h>
 #include <Thread.h>
 #include <Timer.h>
+#include <ServiceClientPool.h>
 #include <ServiceClient.h>
 
 #include <unordered_map>
@@ -11,6 +12,7 @@
 
 moxie::ServiceClient::ServiceClient() :
     tid_(gettid()),
+	freeSize_(0),
     mutex_(), 
     cond_(mutex_),
     name_(""),
@@ -55,39 +57,114 @@ bool moxie::ServiceClient::init(const std::vector<NetAddress>& addr, const std::
         // put empty clientset to used.
         used_.emplace_back(new ClientSet);
         status_.emplace_back(ALIVE);
+		freeSize_ += clients.size();
     }
     return true;
 }
 
-boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::getClient() {
-    if (free_.size() != used_.size() || free_.size() == 0 || used_.size() == 0) {
-        LOGGER_ERROR("check size error in getClient.");
-        return nullptr;
-    }
-    size_t index = 0;
+size_t moxie::ServiceClient::getBackEnd(const std::string& key, LoadBalance py) {
+	return 0;
+}
 
+boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::getClientGlobal(const std::string& name_, const size_t index) {
+	boost::shared_ptr<moxie::TcpClient> client = nullptr;
+	auto services = std::move(ServiceClientPool::GetService(name_));
+	for (auto service : services) {
+		auto ret = fetchClientFromOther(service, index);
+		if (ret) {
+			return ret;
+		}
+	}
+	return nullptr;
+}
+
+boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::fetchClientFromOther(boost::shared_ptr<ServiceClient> service, size_t index) {
+	auto ret = service->removeClientToOther(index);
+	if (ret) {
+		return ret;
+	}
+	return nullptr;
+}
+
+boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::removeClientToOther(size_t index) {
+	size_t size = 0;
+	{
+		MutexLocker locker(mutex_);
+		size = free_.size();
+	}
+	if (index >= size || size == 0) {
+		return nullptr;
+	}
+	boost::shared_ptr<TcpClient> client = nullptr;
+	{
+		MutexLocker locker(mutex_);
+		auto clientset = free_[index];
+		if (clientset->size() > 0) {
+			client = clientset->fetch();
+		}
+	}
+	return client;
+}
+
+boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::getClient() {
+	LOGGER_TRACE("begin getClient");
+	size_t start = 0;
+	size_t end = 0;
+	{
+		LOGGER_TRACE("before free size");
+		MutexLocker locker(mutex_);
+		end = free_.size();
+		LOGGER_TRACE("end free size");
+	}
+	for (size_t k = start; k < end; ++k) {
+		auto client = getClient(k);
+		if (!client) {
+			continue;
+		}
+		LOGGER_TRACE("end getClient");
+		return client;
+	}
+	LOGGER_TRACE("end getClient");
+	return nullptr;
+}
+
+boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::getClient(const size_t index) {	
     auto clientset = free_[index];
     size_t size = 0;
-    boost::shared_ptr<moxie::TcpClient> client;
+	LOGGER_TRACE("free client num[" << clientset->size()
+                    << "] used client num[" << used_[index]->size() << "].");
+    boost::shared_ptr<moxie::TcpClient> client = nullptr;
     {
         MutexLocker locker(mutex_);
         size = clientset->size();
         // 如果有空闲client的话则直接取
         if (size > 0) {
             client = clientset->fetch();
-            used_[index]->store(client);
-            LOGGER_TRACE("free client num[" << clientset->size()
+			used_[index]->store(client);
+			LOGGER_TRACE("free client num[" << clientset->size()
                     << "] used client num[" << used_[index]->size() << "].");
+			--freeSize_;
             return client;
         }
     }
+	//到其他线程中去查找client
+	client = getClientGlobal(name_, index);
+	if (client) {
+		{
+			MutexLocker locker(mutex_);
+			used_[index]->store(client);
+			--freeSize_;
+		}
+		LOGGER_TRACE("get client from other service.");
+		return client;
+	}
     // 没有client则调到条件循环中等待，只等待3s，有空闲client
     int waitcount = 0;
     while (size == 0 && waitcount < 3) {
         LOGGER_TRACE("free client num[" << size << "].");
         // 开辟一个线程创建新的client,暂时使用这种方式，后续会做优化 
-        Thread thread(boost::bind(&ServiceClient::buildNewClientThread, this, index));
-        thread.start();
+        //Thread thread(boost::bind(&ServiceClient::buildNewClientThread, this, index));
+        //thread.start();
         
         cond_.waitForSeconds(1);
         waitcount++;
@@ -98,10 +175,22 @@ boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::getClient() {
             LOGGER_TRACE("free client num[" << clientset->size() 
                     << "] used client num[" << used_[index]->size() << "].");
             mutex_.unlock();
+			--freeSize_;
             return client;
         }
     }
+    mutex_.unlock();
     return client;
+}
+
+boost::shared_ptr<moxie::TcpClient> moxie::ServiceClient::getClient(const std::string& key, LoadBalance py) {
+    if (free_.size() != used_.size() || free_.size() == 0 || used_.size() == 0) {
+        LOGGER_ERROR("check size error in getClient.");
+        return nullptr;
+    }
+	
+    size_t index = getBackEnd(key, py);
+	return getClient(index);
 }
 
 void moxie::ServiceClient::beginCheckServerAlive(const NetAddress& addr, size_t index, const std::string& name) {
@@ -213,4 +302,16 @@ bool moxie::ServiceClient::checkConnectSucc(int sd) {
         LOGGER_ERROR(" getsockopt : " << ::strerror(errno));
         return false;
     } 
+}
+
+bool moxie::ServiceClient::checkInOwner() const {
+	return tid_ == gettid();
+}
+
+size_t moxie::ServiceClient::getFreeSize() {
+	if (!checkInOwner()) {
+		MutexLocker locker(mutex_);
+		return freeSize_;
+	}
+	return freeSize_;
 }

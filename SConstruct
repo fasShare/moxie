@@ -18,7 +18,7 @@ StaticLibrary('./lib/fas',
         CCFLAGS = FAS_CFLAGS
         )
 
-Program('demo/bin/Client', 'demo/Client.cpp',
+Program('demo/bin/TcpClient', 'demo/ServiceClientTest.cpp',
         LIBPATH = ['lib'],
         CPPPATH = ['.', 'utils', 'base'],
         LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],

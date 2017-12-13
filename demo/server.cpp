@@ -11,7 +11,9 @@
 using namespace moxie;
 
 void HasData(boost::shared_ptr<TcpConnection> conn, Timestamp time) {
-    conn->sendString(conn->getReadBuffer()->retrieveAllAsString());
+	std::string recv = conn->getReadBuffer()->retrieveAllAsString();
+	std::cout << "recv:" << recv << std::endl;
+    conn->sendString(recv);
     //TcpConnection::shutdown(conn);
 }
 

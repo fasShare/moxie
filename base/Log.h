@@ -12,45 +12,41 @@ namespace moxie {
 #define LOGGER_FATAL(MSG) (LOG(FATAL) << MSG)
 #define LOGGER_SYSERR(MSG) (LOG(ERROR) << MSG)
 
-#define LOG_INFO google::GLOG_INFO
-#define LOG_ERROR google::GLOG_ERROR
-#define LOG_FATAL google::GLOG_FATAL
-#define LOG_WARN google::GLOG_WARNING
+#define LOG_INFO google::GLOG_INFO				//1
+#define LOG_WARN google::GLOG_WARNING			//2
+#define LOG_ERROR google::GLOG_ERROR			//3
+#define LOG_FATAL google::GLOG_FATAL			//4
+
+struct LogConf {
+	std::string logdir;
+	int minlevelout;
+	std::string warnsuffix;
+	std::string noticesuffix;
+	int logbufsecs;
+	int maxlogsize;
+	bool logtostderr;
+	bool alsologtostderr;
+
+	bool init() {	
+		logdir = "";
+		minlevelout = LOG_WARN;
+		warnsuffix = "";
+		noticesuffix = "";
+		logbufsecs = 0;
+		maxlogsize = 10;
+		logtostderr = false;
+		alsologtostderr = false;
+		return true;
+	}
+};
 
 class CommonLog {
 public:
-    static bool OpenLog(std::string logdir, int level, std::string warn, std::string error, std::string info = "", std::string fatal = "") {
-        return Instance()->openLog(logdir, level, warn, error, info, fatal);
+    static bool OpenLog(const LogConf& conf) {
+        return Instance()->openLog(conf);
     }
     static void CloseLog() {
         Instance()->closeLog();
-    }
-    static void AllLogToStderr(bool open) {
-        FLAGS_logtostderr = open;
-    }
-    static void OutputLogToStderrAndFile(bool yesno) {
-        FLAGS_alsologtostderr = yesno;
-    }
-    static bool MinLevelTStderrWithColor(int level, bool color) {
-        if (level != LOG_INFO
-            && level != LOG_ERROR
-            && level != LOG_FATAL
-            && level != LOG_WARN) {
-            return false;
-        }
-        FLAGS_stderrthreshold = level;
-        FLAGS_colorlogtostderr = color;
-        return true; 
-    }
-    static bool MinLogLevelOutput(int level) {
-        if (level != LOG_INFO
-            && level != LOG_ERROR
-            && level != LOG_FATAL
-            && level != LOG_WARN) {
-            return false;
-        }
-        FLAGS_minloglevel = level;
-        return true;
     }
     
     ~CommonLog() {
@@ -60,17 +56,15 @@ private:
     CommonLog() {
 		google::InitGoogleLogging("");
 	}
-    bool openLog(std::string logdir, int level, std::string warn, std::string error, std::string info, std::string fatal); 
+    bool openLog(const LogConf& conf); 
 
     static CommonLog *Instance();
 
     void closeLog();
     static CommonLog *logger_;
     std::string logdir_;
-    std::string warn_;
-    std::string error_;
-    std::string fatal_;
-    std::string info_;
+	std::string noticesuffix_;
+	std::string warnsuffix_;
     int outlevel_;
 };
 

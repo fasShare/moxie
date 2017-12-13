@@ -7,6 +7,10 @@ int moxie::MoxieConf::getThreadNum() const {
     return threadNum_;
 }
 
+moxie::LogConf moxie::MoxieConf::getLogConf() const {
+	
+}
+
 const std::map<std::string, std::vector<moxie::NetAddress>>& moxie::MoxieConf::getAddress() const {
     return addrs_;
 }
