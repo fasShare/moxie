@@ -19,26 +19,32 @@ bool moxie::CommonLog::openLog(const LogConf& conf) {
     if (::access(logdir_.c_str(), F_OK|W_OK|R_OK)) {
         std::cerr << "fas has no permission of log dir "<< logdir_  << std::endl;
         return false;
-    }
+	}
+
+	google::InitGoogleLogging("");	
 
     noticesuffix_ = conf.noticesuffix;
 	warnsuffix_ = conf.warnsuffix;
 
-    google::SetLogDestination(google::GLOG_FATAL, warnsuffix_.c_str());
-    google::SetLogDestination(google::GLOG_ERROR, warnsuffix_.c_str());
-    google::SetLogDestination(google::GLOG_WARNING, warnsuffix_.c_str());
-    google::SetLogDestination(google::GLOG_INFO, noticesuffix_.c_str());
+	std::string fataldir = (logdir_ + "/" + warnsuffix_).c_str();
+	std::string errordir = (logdir_ + "/" + warnsuffix_).c_str();
+	std::string warndir = (logdir_ + "/" + warnsuffix_).c_str();
+	std::string noticedir = (logdir_ + "/" + noticesuffix_).c_str();
+
+    google::SetLogDestination(google::GLOG_FATAL, fataldir.c_str());
+    google::SetLogDestination(google::GLOG_ERROR, errordir.c_str());
+    google::SetLogDestination(google::GLOG_WARNING, warndir.c_str());
+    google::SetLogDestination(google::GLOG_INFO, noticedir.c_str());
     
     FLAGS_logbufsecs = conf.logbufsecs;
     FLAGS_max_log_size = conf.maxlogsize > 0 ? conf.maxlogsize : 6;
     FLAGS_stop_logging_if_full_disk = true;
     FLAGS_logtostderr = conf.logtostderr;
+	FLAGS_colorlogtostderr = FLAGS_logtostderr;
 	FLAGS_alsologtostderr = conf.alsologtostderr;
-	FLAGS_stderrthreshold = conf.minlevelout;
 	FLAGS_minloglevel = conf.minlevelout;
-	FLAGS_colorlogtostderr = true;
 	
-	google::SetLogFilenameExtension(".log");
+	google::SetLogFilenameExtension(".log.");
 	
     return true;
 }

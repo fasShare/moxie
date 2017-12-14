@@ -53,9 +53,7 @@ public:
         google::ShutdownGoogleLogging();
     }
 private:
-    CommonLog() {
-		google::InitGoogleLogging("");
-	}
+	CommonLog() = default;
     bool openLog(const LogConf& conf); 
 
     static CommonLog *Instance();

@@ -30,9 +30,3 @@ Program('demo/bin/Server', 'demo/server.cpp',
         LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],
         CCFLAGS = ['-Wall', '-static', '-std=c++11']
        )
-Program('demo/bin/LogDemo', 'demo/Logdemo.cpp',
-        LIBPATH = ['lib'],
-        CPPPATH = ['.', 'utils', 'base'],
-        LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],
-        CCFLAGS = ['-Wall', '-static', '-std=c++11']
-       )
