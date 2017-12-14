@@ -19,7 +19,6 @@ moxie::TcpClient::TcpClient(const NetAddress& addr) :
 }
 
 bool moxie::TcpClient::connectToServer() {
-    //sock_.setNoBlocking();
     sock_.setExecClose();
     if (sock_.connect(addr_)) {
         boost::shared_ptr<Events> event(new Events(sock_.getSocket(), kNoneEvent));

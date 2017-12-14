@@ -58,7 +58,7 @@ public:
 	boost::shared_ptr<TcpClient> getClient(const std::string& key, LoadBalance py);
 	boost::shared_ptr<TcpClient> getClient();
     bool putClient(boost::shared_ptr<TcpClient>);
-    void buildNewClientThread(size_t index);
+    void buildNewClient(size_t index);
     bool removeClientUsed(size_t index, boost::shared_ptr<TcpClient> client);
 	boost::shared_ptr<moxie::TcpClient> fetchClientFromOther(boost::shared_ptr<ServiceClient> service, size_t index);
 
@@ -78,8 +78,8 @@ private:
 	boost::shared_ptr<moxie::TcpClient> getClientGlobal(const std::string& name_, const size_t index);
 	bool checkConnectSucc(int sd);
     void beginCheckServerAlive(const NetAddress& addr, size_t index, const std::string& name);
-    long tid_;
-	size_t freeSize_;
+
+	long tid_;
     Mutex mutex_;
     Condition cond_;
     std::string name_;
