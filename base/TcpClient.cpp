@@ -48,7 +48,7 @@ void moxie::TcpClient::HasData(boost::shared_ptr<TcpConnection> conn, Timestamp 
 		case DataTransfer::DATA_OK:
 			if (transfer->DataFetch(conn, length, client->request, client->response)) {
 				client->done(client->request, client->response);
-                //RecycleClient(client);
+                RecycleClient(client);
 			} else {
 				LOGGER_WARN("DataFetch failed!");
 			}
