@@ -19,7 +19,6 @@ moxie::TcpClient::TcpClient(const NetAddress& addr) :
 }
 
 bool moxie::TcpClient::connectToServer() {
-    //sock_.setNoBlocking();
     sock_.setExecClose();
     if (sock_.connect(addr_)) {
         boost::shared_ptr<Events> event(new Events(sock_.getSocket(), kNoneEvent));
@@ -48,7 +47,7 @@ void moxie::TcpClient::HasData(boost::shared_ptr<TcpConnection> conn, Timestamp 
 		case DataTransfer::DATA_OK:
 			if (transfer->DataFetch(conn, length, client->request, client->response)) {
 				client->done(client->request, client->response);
-                //RecycleClient(client);
+                RecycleClient(client);
 			} else {
 				LOGGER_WARN("DataFetch failed!");
 			}
