@@ -7,6 +7,10 @@ int moxie::MoxieConf::getThreadNum() const {
     return threadNum_;
 }
 
+moxie::LogConf moxie::MoxieConf::getLogConf() const {
+	return logconf_;	
+}
+
 const std::map<std::string, std::vector<moxie::NetAddress>>& moxie::MoxieConf::getAddress() const {
     return addrs_;
 }
@@ -46,12 +50,30 @@ bool moxie::MoxieConf::load(const std::string& conf) {
 }
 
 bool moxie::MoxieConf::parseLogger(const Json::Value& root) {
-    if (root.isMember("minleveloutstd") && root["minleveloutstd"].isInt()) {
-        minleveloutstd_ = root["minleveloutstd"].asInt();
+    if (root.isMember("minlevelout") && root["minlevelout"].isInt()) {
+        logconf_.minlevelout = root["minlevelout"].asInt();
     }
     if (root.isMember("logdir") && root["logdir"].isString()) {
-        logdir_ = root["logdir"].asString();
+        logconf_.logdir = root["logdir"].asString();
     }
+	if (root.isMember("warnsuffix") && root["warnsuffix"].isString()) {
+		logconf_.warnsuffix = root["warnsuffix"].asString();
+	}
+	if (root.isMember("noticesuffix") && root["noticesuffix"].isString()) {
+		logconf_.noticesuffix = root["noticesuffix"].asString();
+	}
+	if (root.isMember("logbufsecs") && root["logbufsecs"].isInt()) {
+		logconf_.logbufsecs = root["logbufsecs"].asInt();
+	}
+	if (root.isMember("maxlogsize") && root["maxlogsize"].isInt()) {
+		logconf_.maxlogsize = root["maxlogsize"].asInt();
+	}
+	if (root.isMember("logtostderr") && root["logtostderr"].isBool()) {
+		logconf_.logtostderr = root["logtostderr"].asBool();
+	}
+	if (root.isMember("alsologtostderr") && root["alsologtostderr"].isBool()) {
+		logconf_.alsologtostderr = root["alsologtostderr"].asBool();
+	}
     return true;
 }
 
@@ -84,7 +106,8 @@ bool moxie::MoxieConf::parseServiceItem(const Json::Value& root) {
 }
 
 bool moxie::MoxieConf::parseService(const Json::Value& root) {
-    for (size_t i = 0; i < root.size(); ++i) {
+	std::cerr << "service length:" << root.size() << std::endl;
+	for (size_t i = 0; i < root.size(); ++i) {
         parseServiceItem(root[i]);
     }
     return true;

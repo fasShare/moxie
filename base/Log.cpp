@@ -14,28 +14,38 @@ moxie::CommonLog* moxie::CommonLog::Instance() {
     return logger_;
 }
 
-bool moxie::CommonLog::openLog(std::string logdir, int level, std::string warn, std::string error, std::string info, std::string fatal) {
-    logdir_ == "" ? "./" : logdir_;
-    if (::access(logdir.c_str(), F_OK|W_OK|R_OK)) {
-        std::cerr << "fas has no permission of log dir "<< logdir  << std::endl;
+bool moxie::CommonLog::openLog(const LogConf& conf) {
+    logdir_ = conf.logdir;
+    if (::access(logdir_.c_str(), F_OK|W_OK|R_OK)) {
+        std::cerr << "fas has no permission of log dir "<< logdir_  << std::endl;
         return false;
-    }
+	}
 
-    warn = warn == "" ? "warning" : warn;
-    error = error == "" ? "error" : error;
-    fatal = fatal == "" ? error : fatal;
-    info = info == "" ? warn : info;
+	google::InitGoogleLogging("");	
 
-    google::SetLogDestination(google::GLOG_FATAL, fatal.c_str());
-    google::SetLogDestination(google::GLOG_ERROR, error.c_str());
-    google::SetLogDestination(google::GLOG_WARNING, warn.c_str());
-    google::SetLogDestination(google::GLOG_INFO, info.c_str());
+    noticesuffix_ = conf.noticesuffix;
+	warnsuffix_ = conf.warnsuffix;
+
+	std::string fataldir = (logdir_ + "/" + warnsuffix_).c_str();
+	std::string errordir = (logdir_ + "/" + warnsuffix_).c_str();
+	std::string warndir = (logdir_ + "/" + warnsuffix_).c_str();
+	std::string noticedir = (logdir_ + "/" + noticesuffix_).c_str();
+
+    google::SetLogDestination(google::GLOG_FATAL, fataldir.c_str());
+    google::SetLogDestination(google::GLOG_ERROR, errordir.c_str());
+    google::SetLogDestination(google::GLOG_WARNING, warndir.c_str());
+    google::SetLogDestination(google::GLOG_INFO, noticedir.c_str());
     
-    FLAGS_logbufsecs = 1;
-    FLAGS_max_log_size = 10;
+    FLAGS_logbufsecs = conf.logbufsecs;
+    FLAGS_max_log_size = conf.maxlogsize > 0 ? conf.maxlogsize : 6;
     FLAGS_stop_logging_if_full_disk = true;
-    google::SetLogFilenameExtension(".log");
-
+    FLAGS_logtostderr = conf.logtostderr;
+	FLAGS_colorlogtostderr = FLAGS_logtostderr;
+	FLAGS_alsologtostderr = conf.alsologtostderr;
+	FLAGS_minloglevel = conf.minlevelout;
+	
+	google::SetLogFilenameExtension(".log.");
+	
     return true;
 }
 

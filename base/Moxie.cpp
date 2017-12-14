@@ -52,12 +52,15 @@ bool moxie::Moxie::MoxieInit(const MoxieConf& conf) {
 }
 
 bool moxie::Moxie::init(const MoxieConf& conf) {
-    int ThreadNum = conf.getThreadNum();
+    // init thread pool
+	int ThreadNum = conf.getThreadNum();
     if (ThreadNum > 0) {
 		threadPool_ = new (std::nothrow) ThreadPool(ThreadNum, LoopThreadFunc, "WorkLoopThreadPool");
 		assert(Instance()->threadPool_);
-		Instance()->threadPool_->start();
     }
+	// init logger
+	CommonLog::OpenLog(conf.getLogConf());
+	// init eventloop
 	loop_ = new (std::nothrow) EventLoop();
 	return EventLoopPool::addMainLoop(loop_);
 }
@@ -68,6 +71,9 @@ bool moxie::Moxie::Run() {
         LOGGER_ERROR("Create clients error in this thread.");
         return false;
     }
+	if (Instance()->threadPool_) {
+		Instance()->threadPool_->start();
+	}
 
     return Instance()->loop_->loop();
 }

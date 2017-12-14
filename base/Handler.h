@@ -4,6 +4,7 @@
 #include <Timestamp.h>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
 
 namespace moxie {
 
@@ -11,7 +12,7 @@ class Handler {
 public:
     virtual ~Handler() {};
     void doHandle(boost::shared_ptr<Events> events, Timestamp time) {
-        if (events->isClose()) {
+		if (events->isClose()) {
             handleClose(events, time);
         } else if (events->isError()) {
             handleError(events, time);
@@ -20,7 +21,6 @@ public:
         } else if (events->isWrite()) {
             handleWrite(events, time);
         }   
-
     }
     virtual void handleRead(boost::shared_ptr<Events> revents, Timestamp time) = 0;
     virtual void handleWrite(boost::shared_ptr<Events> revents, Timestamp time) = 0;

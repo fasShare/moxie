@@ -34,9 +34,22 @@ boost::shared_ptr<moxie::ServiceClient> moxie::ServiceClientPool::getService(lon
     return result->second;
 }
 
+std::vector<boost::shared_ptr<moxie::ServiceClient>> moxie::ServiceClientPool::getService(const std::string& name) {
+	MutexLocker locker(mutex_);
+	std::vector<boost::shared_ptr<ServiceClient>> serv;
+	for (auto &service : services_) {
+		for (auto &client : service.second) {
+			if (client.first == name) {
+				serv.emplace_back(client.second);
+			}
+		}
+	}
+	return std::move(serv);
+}
+
 moxie::ServiceClientPool *moxie::ServiceClientPool::Instance() {
-    if (nullptr == instance_) {
-        instance_ = new (std::nothrow) ServiceClientPool();
-    }
-    return instance_;
+	if (nullptr == instance_) {
+		instance_ = new (std::nothrow) ServiceClientPool();
+	}
+	return instance_;
 }

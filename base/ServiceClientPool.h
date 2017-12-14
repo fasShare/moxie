@@ -20,10 +20,14 @@ public:
                                             const std::string& name) {
         return Instance()->getService(tid, name);
     }
+	static std::vector<boost::shared_ptr<ServiceClient>> GetService(const std::string& name) {
+		return Instance()->getService(name);
+	}
 private:
     bool addServiceClient(long tid, const std::string& name,
                         boost::shared_ptr<ServiceClient> service);
     boost::shared_ptr<ServiceClient> getService(long tid, const std::string& name);
+	std::vector<boost::shared_ptr<ServiceClient>> getService(const std::string& name);
     static ServiceClientPool *Instance();
     ServiceClientPool();
     

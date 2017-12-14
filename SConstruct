@@ -1,7 +1,8 @@
 FAS_CFLAGS = [
-    '-Wall',
+	'-Wall',
     '-static',
-    '-std=c++11'
+    '-std=c++11',
+	'-Wno-old-style-cast'
     ]
 
 StaticLibrary('./lib/fasutils',
@@ -17,19 +18,13 @@ StaticLibrary('./lib/fas',
         CCFLAGS = FAS_CFLAGS
         )
 
-Program('demo/bin/Client', 'demo/Client.cpp',
+Program('demo/bin/TcpClient', 'demo/ServiceClientTest.cpp',
         LIBPATH = ['lib'],
         CPPPATH = ['.', 'utils', 'base'],
         LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],
         CCFLAGS = ['-Wall', '-static', '-std=c++11']
        )
 Program('demo/bin/Server', 'demo/server.cpp',
-        LIBPATH = ['lib'],
-        CPPPATH = ['.', 'utils', 'base'],
-        LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],
-        CCFLAGS = ['-Wall', '-static', '-std=c++11']
-       )
-Program('demo/bin/LogDemo', 'demo/Logdemo.cpp',
         LIBPATH = ['lib'],
         CPPPATH = ['.', 'utils', 'base'],
         LIBS = ['fasutils', 'fas', 'glog', 'pthread', 'jsoncpp'],

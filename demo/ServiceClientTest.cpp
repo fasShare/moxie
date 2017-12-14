@@ -43,6 +43,10 @@ void Timerfunc() {
     }
     LOGGER_TRACE("Before getClient.");
     auto client = service->getClient();
+	if (!client) {
+		LOGGER_WARN("Get nullptr client.");
+		return;
+	}
     LOGGER_TRACE("After getClient.");
     client->SetDataTransfer(new mydataTransfer());
 
