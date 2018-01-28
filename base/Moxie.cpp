@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <new>
+#include <atomic>
 
 #include <Moxie.h>
 #include <Events.h>
@@ -17,6 +18,8 @@
 
 moxie::Moxie *moxie::Moxie::moxie_ = nullptr;
 
+static std::atomic<int> start_num; 
+
 void LoopThreadFunc() {
     moxie::ServiceManager manager(moxie::Moxie::getConf().getAddress());
     if (!manager.createClientForThisThread()) {
@@ -32,13 +35,18 @@ void LoopThreadFunc() {
 		return;
 	}
 
+    ++start_num;
+    moxie::Moxie::ThreadRunNotify();
+
 	loop->loop();
 }
 
 moxie::Moxie::Moxie() :
     threadPool_(nullptr),
     loop_(nullptr),
-    signor_() {
+    signor_(),
+    mutex_(),
+    cond_(mutex_) {
 }
 
 const moxie::MoxieConf& moxie::Moxie::getConf() {
@@ -75,7 +83,22 @@ bool moxie::Moxie::Run() {
 		Instance()->threadPool_->start();
 	}
 
+    int ThreadNum = Moxie::getConf().getThreadNum();
+
+    while (start_num != ThreadNum) {
+        LOGGER_WARN("Started thread num not equal required thread num....");
+        ThreadRunWait();
+    }
+
     return Instance()->loop_->loop();
+}
+
+void moxie::Moxie::ThreadRunNotify() {
+    Instance()->cond_.notify();
+}
+
+void moxie::Moxie::ThreadRunWait() {
+    Instance()->cond_.wait();
 }
 
 moxie::Moxie* moxie::Moxie::Instance() {
