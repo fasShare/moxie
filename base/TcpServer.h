@@ -21,7 +21,7 @@ namespace moxie {
 
 class TcpServer : public Handler{
 public:
-    using TcpConnCallback = boost::function<void (const boost::shared_ptr<TcpConnection>, Timestamp)>;
+    using TcpConnCallback = boost::function<void (boost::shared_ptr<TcpConnection>, Timestamp)>;
     TcpServer(const NetAddress& addr, int threadNum = 4);
     ~TcpServer();
 
